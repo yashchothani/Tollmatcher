@@ -17,13 +17,21 @@ VOICE_MODELS = {
     "de": {
         "model": "de_DE-thorsten-medium.onnx",
         "config": "de_DE-thorsten-medium.onnx.json"
+    },
+    "es": {
+        "model": "es_ES-carlfm-x_low.onnx",
+        "config": "es_ES-carlfm-x_low.onnx.json"
+    },
+    "fr": {
+        "model": "fr_FR-gilles-low.onnx",
+        "config": "fr_FR-gilles-low.onnx.json"
     }
 }
 
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    lang_choice = input("Enter language (zh, en, de): ").strip().lower()
+    lang_choice = input("Enter language (zh, en, de, es, fr): ").strip().lower()
     if lang_choice not in VOICE_MODELS:
         print("Invalid language")
         return
