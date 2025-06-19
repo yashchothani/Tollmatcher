@@ -39,38 +39,63 @@ user_record_start_time = None
 
 # Audio confirmation files 
 audio_map = {
-    'zh_en': os.path.join(os.path.dirname(__file__), '../languages/zh_en.wav'), # means user_guest lang
-    'zh_de': os.path.join(os.path.dirname(__file__), '../languages/zh_de.wav'),
-    'zh_es': os.path.join(os.path.dirname(__file__), '../languages/zh_es.wav'), # new
-    'zh_fr': os.path.join(os.path.dirname(__file__), '../languages/zh_fr.wav'), # new
-    
-    'en_zh': os.path.join(os.path.dirname(__file__), '../languages/en_zh.wav'),
     'en_de': os.path.join(os.path.dirname(__file__), '../languages/en_de.wav'),
     'en_es': os.path.join(os.path.dirname(__file__), '../languages/en_es.wav'), # new
     'en_fr': os.path.join(os.path.dirname(__file__), '../languages/en_fr.wav'), # new
-    
-        
-    'de_zh': os.path.join(os.path.dirname(__file__), '../languages/de_zh.wav'),
+    'en_uk': os.path.join(os.path.dirname(__file__), '../languages/en_uk.wav'), # new
+    'en_it': os.path.join(os.path.dirname(__file__), '../languages/en_it.wav'), # new
+    'en_ca': os.path.join(os.path.dirname(__file__), '../languages/en_ca.wav'), # new
+            
     'de_en': os.path.join(os.path.dirname(__file__), '../languages/de_en.wav'),
     'de_es': os.path.join(os.path.dirname(__file__), '../languages/de_es.wav'), # new
     'de_fr': os.path.join(os.path.dirname(__file__), '../languages/de_fr.wav'), # new
+    'de_uk': os.path.join(os.path.dirname(__file__), '../languages/de_uk.wav'), # new
+    'de_it': os.path.join(os.path.dirname(__file__), '../languages/de_it.wav'), # new
+    'de_ca': os.path.join(os.path.dirname(__file__), '../languages/de_ca.wav'), # new
     
-    'es_zh': os.path.join(os.path.dirname(__file__), '../languages/es_zh.wav'),
     'es_en': os.path.join(os.path.dirname(__file__), '../languages/es_en.wav'),
     'es_de': os.path.join(os.path.dirname(__file__), '../languages/es_de.wav'), # new
     'es_fr': os.path.join(os.path.dirname(__file__), '../languages/es_fr.wav'), # new
+    'es_uk': os.path.join(os.path.dirname(__file__), '../languages/es_uk.wav'), # new
+    'es_it': os.path.join(os.path.dirname(__file__), '../languages/es_it.wav'), # new
+    'es_ca': os.path.join(os.path.dirname(__file__), '../languages/es_ca.wav'), # new
 
-    'fr_zh': os.path.join(os.path.dirname(__file__), '../languages/fr_zh.wav'),
     'fr_en': os.path.join(os.path.dirname(__file__), '../languages/fr_en.wav'),
     'fr_es': os.path.join(os.path.dirname(__file__), '../languages/fr_es.wav'), # new
     'fr_de': os.path.join(os.path.dirname(__file__), '../languages/fr_de.wav'), # new
-        
+    'fr_uk': os.path.join(os.path.dirname(__file__), '../languages/fr_uk.wav'), # new
+    'fr_it': os.path.join(os.path.dirname(__file__), '../languages/fr_it.wav'), # new
+    'fr_ca': os.path.join(os.path.dirname(__file__), '../languages/fr_ca.wav'), # new
+
+    'uk_en': os.path.join(os.path.dirname(__file__), '../languages/uk_en.wav'), # means user_guest lang
+    'uk_de': os.path.join(os.path.dirname(__file__), '../languages/uk_de.wav'),
+    'uk_es': os.path.join(os.path.dirname(__file__), '../languages/uk_es.wav'), # new
+    'uk_fr': os.path.join(os.path.dirname(__file__), '../languages/uk_fr.wav'), # new
+    'uk_it': os.path.join(os.path.dirname(__file__), '../languages/uk_it.wav'), # new
+    'uk_ca': os.path.join(os.path.dirname(__file__), '../languages/uk_ca.wav'), # new
+
+    'it_en': os.path.join(os.path.dirname(__file__), '../languages/it_en.wav'), # means user_guest lang
+    'it_de': os.path.join(os.path.dirname(__file__), '../languages/it_de.wav'),
+    'it_es': os.path.join(os.path.dirname(__file__), '../languages/it_es.wav'), # new
+    'it_fr': os.path.join(os.path.dirname(__file__), '../languages/it_fr.wav'), # new
+    'it_uk': os.path.join(os.path.dirname(__file__), '../languages/it_uk.wav'), # new
+    'it_ca': os.path.join(os.path.dirname(__file__), '../languages/it_ca.wav'), # new
+    
+    'ca_en': os.path.join(os.path.dirname(__file__), '../languages/ca_en.wav'), # means user_guest lang
+    'ca_de': os.path.join(os.path.dirname(__file__), '../languages/ca_de.wav'),
+    'ca_es': os.path.join(os.path.dirname(__file__), '../languages/ca_es.wav'), # new
+    'ca_fr': os.path.join(os.path.dirname(__file__), '../languages/ca_fr.wav'), # new
+    'ca_uk': os.path.join(os.path.dirname(__file__), '../languages/ca_uk.wav'), # new
+    'ca_it': os.path.join(os.path.dirname(__file__), '../languages/ca_it.wav'), # new
+               
     't_en': os.path.join(os.path.dirname(__file__), '../languages/en_user.wav'), # target = user lang
     't_de': os.path.join(os.path.dirname(__file__), '../languages/de_user.wav'),
-    't_zh': os.path.join(os.path.dirname(__file__), '../languages/zh_user.wav'),
     't_es': os.path.join(os.path.dirname(__file__), '../languages/es_user.wav'), # new
     't_fr': os.path.join(os.path.dirname(__file__), '../languages/fr_user.wav'), # new
-    
+    't_uk': os.path.join(os.path.dirname(__file__), '../languages/uk_user.wav'), # new
+    't_it': os.path.join(os.path.dirname(__file__), '../languages/it_user.wav'), # new
+    't_ca': os.path.join(os.path.dirname(__file__), '../languages/ca_user.wav'), # new
+           
     'default': os.path.join(os.path.dirname(__file__), '../languages/default.wav'),
     'error': os.path.join(os.path.dirname(__file__), '../languages/error.wav')
 }
@@ -126,7 +151,7 @@ def interrupt_audio_playback(caller):
 
 
 # Language selection logic
-language_codes = ['en', 'de', 'zh', 'es', 'fr'] # we could add more languages
+language_codes = ['en', 'de', 'es', 'fr', 'uk', 'it', 'ca'] # we could add more languages
 source_index = language_codes.index('en') # guest's default lang
 target_index = language_codes.index('de') # user's default lang
 selected_langs = {'source': language_codes[source_index], 'target': language_codes[target_index]}
@@ -286,10 +311,6 @@ def record_loop(recorder, stop_flag_name):
 
 def speak_with_piper(text, lang_code, device):
     piper_models = {
-        "zh": {
-            "model": "zh_CN-huayan-medium.onnx",
-            "config": "zh_CN-huayan-medium.onnx.json"
-        },
         "en": {
             "model": "en_US-john-medium.onnx",
             "config": "en_US-john-medium.onnx.json"
@@ -305,6 +326,18 @@ def speak_with_piper(text, lang_code, device):
         "fr": {
             "model": "fr_FR-gilles-low.onnx",
             "config": "fr_FR-gilles-low.onnx.json"
+        },
+        "uk": {
+            "model": "uk_UA-lada-x_low.onnx",
+            "config": "uk_UA-lada-x_low.onnx.json"
+        },    
+        "it": {
+            "model": "it_IT-paola-medium.onnx",
+            "config": "it_IT-paola-medium.onnx.json"
+        },    
+        "ca": {
+            "model": "ca_ES-upc_ona-x_low.onnx",
+            "config": "ca_ES-upc_ona-x_low.onnx.json"
         }
     }
 
@@ -503,7 +536,7 @@ def button2_released():
             print(f"[Time] Translation took {t2 - t1:.2f} seconds")
 
             print("Speaking with Piper...")
-            speak_with_piper(translation, target, device="plughw:CARD=USB,DEV=0") # need changed Device
+            speak_with_piper(translation, target, device="plughw:CARD=Device,DEV=0") # need changed Device
             t3 = time.time()
             print(f"[Time] TTS took {t3 - t2:.2f} seconds")
             print(f"[Total Time] {t3 - t0:.2f} seconds")

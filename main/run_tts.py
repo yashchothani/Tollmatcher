@@ -6,10 +6,6 @@ PIPER_PATH = "/home/tollmatcher2/offline_translator/piper_rebuild/piper/piper"
 OUTPUT_DIR = "/home/tollmatcher2/offline_translator/output"
 
 VOICE_MODELS = {
-    "zh": {
-        "model": "zh_CN-huayan-medium.onnx",
-        "config": "zh_CN-huayan-medium.onnx.json"
-    },
     "en": {
         "model": "en_US-john-medium.onnx",
         "config": "en_US-john-medium.onnx.json"
@@ -25,13 +21,25 @@ VOICE_MODELS = {
     "fr": {
         "model": "fr_FR-gilles-low.onnx",
         "config": "fr_FR-gilles-low.onnx.json"
+    },
+    "uk": {
+        "model": "uk_UA-lada-x_low.onnx",
+        "config": "uk_UA-lada-x_low.onnx.json"
+    },    
+    "it": {
+        "model": "it_IT-paola-medium.onnx",
+        "config": "it_IT-paola-medium.onnx.json"
+    },    
+    "ca": {
+        "model": "ca_ES-upc_ona-x_low.onnx",
+        "config": "ca_ES-upc_ona-x_low.onnx.json"
     }
 }
 
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    lang_choice = input("Enter language (zh, en, de, es, fr): ").strip().lower()
+    lang_choice = input("Enter language (en, de, es, fr, uk, it, ca): ").strip().lower()
     if lang_choice not in VOICE_MODELS:
         print("Invalid language")
         return
