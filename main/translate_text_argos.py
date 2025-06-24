@@ -9,13 +9,17 @@ import time
 SOURCE_BUTTON_PIN = 20  # button3 to select source language
 TARGET_BUTTON_PIN = 21  # button4 to select target language or long press>1s to translate
 
-language_codes = ['en', 'de', 'zh']
+language_codes = ['en', 'de', 'zh', 'ar', 'es', 'fr', 'uk']
 
 # Audio confirmation files 
 audio_map = {
     'en': os.path.join(os.path.dirname(__file__), '../languages/en.wav'),
     'de': os.path.join(os.path.dirname(__file__), '../languages/de.wav'),
-    'zh': os.path.join(os.path.dirname(__file__), '../languages/zh.wav')
+    'zh': os.path.join(os.path.dirname(__file__), '../languages/zh.wav'),
+    'ar': os.path.join(os.path.dirname(__file__), '../languages/de.wav'), # need change, now for testing
+    'es': os.path.join(os.path.dirname(__file__), '../languages/zh.wav'),
+    'fr': os.path.join(os.path.dirname(__file__), '../languages/de.wav'),
+    'uk': os.path.join(os.path.dirname(__file__), '../languages/zh.wav')
 }
 
 # Setup buttons
@@ -57,14 +61,33 @@ def select_target():
 
 def translate_text(source_lang_code, target_lang_code, text):
     installed_languages = argostranslate.translate.get_installed_languages()
+    
     from_lang = next((lang for lang in installed_languages if lang.code == source_lang_code), None)
     to_lang = next((lang for lang in installed_languages if lang.code == target_lang_code), None)
+    en_lang = next((lang for lang in installed_languages if lang.code == 'en'), None)
 
     if not from_lang or not to_lang:
-        return f"Error: Languages '{source_lang_code}' to '{target_lang_code}' not available."
+        return f"Error: Either '{source_lang_code}' or '{target_lang_code}' language is not installed."
 
-    translation = from_lang.get_translation(to_lang)
-    return translation.translate(text)
+    # Try direct translation
+    try:
+        direct_translation = from_lang.get_translation(to_lang)
+        return direct_translation.translate(text)
+    except Exception:
+        pass  # direct translation not available
+
+    # Try using English as intermediate
+    if en_lang:
+        try:
+            to_en = from_lang.get_translation(en_lang)
+            intermediate = to_en.translate(text)
+            from_en = en_lang.get_translation(to_lang)
+            return from_en.translate(intermediate)
+        except Exception:
+            return f"Error: Cannot find translation path from '{source_lang_code}' to '{target_lang_code}' (even with English as bridge)."
+    else:
+        return "Error: English language model is not installed for bridging translation."
+
 
 def manual_translate():
     source = selected_langs['source']

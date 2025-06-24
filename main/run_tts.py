@@ -19,8 +19,8 @@ VOICE_MODELS = {
         "config": "es_ES-carlfm-x_low.onnx.json"
     },
     "fr": {
-        "model": "fr_FR-gilles-low.onnx",
-        "config": "fr_FR-gilles-low.onnx.json"
+        "model": "fr_FR-tom-medium.onnx",
+        "config": "fr_FR-tom-medium.onnx.json"
     },
     "uk": {
         "model": "uk_UA-lada-x_low.onnx",
@@ -33,13 +33,25 @@ VOICE_MODELS = {
     "ca": {
         "model": "ca_ES-upc_ona-x_low.onnx",
         "config": "ca_ES-upc_ona-x_low.onnx.json"
+    },    
+    "ar": {
+        "model": "ar_JO-kareem-low.onnx",
+        "config": "ar_JO-kareem-low.onnx.json"
+    },    
+    "zh": {
+        "model": "zh_CN-huayan-medium.onnx",
+        "config": "zh_CN-huayan-medium.onnx.json"
+    },
+    "nl": {
+        "model": "nl_NL-pim-medium.onnx",
+        "config": "nl_NL-pim-medium.onnx.json"
     }
 }
 
 def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    lang_choice = input("Enter language (en, de, es, fr, uk, it, ca): ").strip().lower()
+    lang_choice = input("Enter language (en, de, es, fr, uk, it, ca, ar, nl, zh): ").strip().lower()
     if lang_choice not in VOICE_MODELS:
         print("Invalid language")
         return
