@@ -11,6 +11,12 @@ sudo systemctl enable offline_translator.service
 sudo systemctl start offline_translator.service
 ```
 
+View the content of service document with:
+
+```bash
+cat /etc/systemd/system/offline_translator.service
+```
+
 ##  Main Scripts
 
 This project provides two main Python scripts. Each script supports offline speech translation and can run independently.
