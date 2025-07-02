@@ -350,8 +350,8 @@ def speak_with_piper(text, lang_code, device):
             "config": "es_ES-carlfm-x_low.onnx.json"
         },
         "fr": {
-            "model": "fr_FR-gilles-low.onnx",
-            "config": "fr_FR-gilles-low.onnx.json"
+            "model": "fr_FR-tom-medium.onnx",
+            "config": "fr_FR-tom-medium.onnx.json"
         },
         "uk": {
             "model": "uk_UA-lada-x_low.onnx",
