@@ -28,6 +28,32 @@ button2 = Button(BUTTON2_PIN, pull_up=True, bounce_time=0.2)
 button3 = Button(BUTTON3_PIN)
 button4 = Button(BUTTON4_PIN)
 
+SYSTEM_BUTTON_PIN = 4
+system_button = Button(SYSTEM_BUTTON_PIN, hold_time=3, pull_up=True)
+def handle_system_press():
+    print("System button held down")
+    press_time = time.time()
+    while system_button.is_held:
+        time.sleep(0.1)
+    duration = time.time() - press_time
+    print(f"Held for {duration:.2f} seconds")
+
+    if duration >= 5:
+        print("Rebooting system...")
+        os.system("sudo /sbin/reboot")
+    elif duration >= 3:
+        print("Shutting down system...")
+        os.system("sudo /sbin/shutdown -h now")
+    else:
+        print("Press too short, ignored.")
+
+def system_button_monitor():
+    while True:
+        system_button.wait_for_press()
+        if system_button.is_held:
+            handle_system_press()
+threading.Thread(target=system_button_monitor, daemon=True).start()
+
 system_locked_by = None 
 # For Button1 (Guest Mic) long-press confirmation
 guest_button_confirmed = False
