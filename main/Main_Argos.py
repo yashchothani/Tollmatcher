@@ -419,6 +419,10 @@ def speak_with_piper(text, lang_code, device):
         "nl": {
             "model": "nl_NL-pim-medium.onnx",
             "config": "nl_NL-pim-medium.onnx.json"
+        },    
+        "zh": {
+            "model": "zh_CN-huayan-medium.onnx",
+             "config": "zh_CN-huayan-medium.onnx.json"
         }
     }
 
