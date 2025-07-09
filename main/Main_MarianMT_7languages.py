@@ -367,8 +367,8 @@ def speak_with_piper(text, lang_code, device):
         }
     }
 
-    PIPER_PATH = "/home/tollmatcher2/offline_translator/piper_rebuild/piper/piper"
-    OUTPUT_DIR = "/home/tollmatcher2/offline_translator/output"
+    PIPER_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../piper_rebuild/piper/piper'))
+    OUTPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../output'))
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     voice = piper_models[lang_code]
@@ -377,8 +377,8 @@ def speak_with_piper(text, lang_code, device):
 
     command = [
         PIPER_PATH,
-        "--model", f"/home/tollmatcher2/offline_translator/piper_rebuild/piper/{voice['model']}",
-        "--config", f"/home/tollmatcher2/offline_translator/piper_rebuild/piper/{voice['config']}",
+        "--model", os.path.abspath(os.path.join(os.path.dirname(__file__), f"../piper_rebuild/piper/{voice['model']}")),
+        "--config", os.path.abspath(os.path.join(os.path.dirname(__file__), f"../piper_rebuild/piper/{voice['config']}")),
         "--output_file", output_file,
     ]
 
@@ -405,7 +405,15 @@ def button1_pressed():
     if current_audio_owner in ["button3", "button4"]:
         print("Playback from Button3/4 is active. Button1 recording blocked.")
         return
-
+    
+    source = selected_langs['source']
+    target = selected_langs['target']
+    if source == target:
+        print("Source and target languages must be different.")
+        play_audio("error", owner="button1", allow_interrupt_from=["button1"])
+        system_locked_by = None
+        return
+        
     if guest_recorder.is_recording:
         return
 
@@ -498,6 +506,7 @@ def button2_pressed():
     if source == target:
         print("Source and target languages must be different.")
         play_audio("error", owner="button2", allow_interrupt_from=["button2"])
+        system_locked_by = None
         return
 
     if user_recorder.is_recording:
