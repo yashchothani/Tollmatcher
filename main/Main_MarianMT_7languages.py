@@ -562,7 +562,7 @@ def button2_released():
             print(f"[Time] Translation took {t2 - t1:.2f} seconds")
 
             print("Speaking with Piper...")
-            speak_with_piper(translation, target, device="plughw:CARD=Device,DEV=0") # need changed Device
+            speak_with_piper(translation, target, device="plughw:CARD=UACDemoV10,DEV=0") # new speaker
             t3 = time.time()
             print(f"[Time] TTS took {t3 - t2:.2f} seconds")
             print(f"[Total Time] {t3 - t0:.2f} seconds")
