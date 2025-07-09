@@ -490,6 +490,14 @@ def button1_pressed():
     if current_audio_owner in ["button3", "button4"]:
         print("Playback from Button3/4 is active. Button1 recording blocked.")
         return
+    
+    source = selected_langs['source']
+    target = selected_langs['target']
+    if source == target:
+        print("Source and target languages must be different.")
+        play_audio("error", owner="button1", allow_interrupt_from=["button1"])
+        system_locked_by = None
+        return
 
     if guest_recorder.is_recording:
         return
@@ -583,6 +591,7 @@ def button2_pressed():
     if source == target:
         print("Source and target languages must be different.")
         play_audio("error", owner="button2", allow_interrupt_from=["button2"])
+        system_locked_by = None
         return
 
     if user_recorder.is_recording:
