@@ -17,6 +17,11 @@ import argostranslate.translate
 
 warnings.filterwarnings("ignore", message="FP16 is not supported on CPU; using FP32 instead")
 
+# Preload Whisper models once at startup to avoid per-call load latency
+# Use tiny.en for English for better speed/accuracy; fall back to tiny for others
+WHISPER_MODEL = whisper.load_model("tiny", device="cpu")
+WHISPER_MODEL_EN = whisper.load_model("tiny.en", device="cpu")
+
 # Button pin definitions
 BUTTON1_PIN = 27  # button1 - guest mic
 BUTTON2_PIN = 22  # button2 - user mic
@@ -544,8 +549,8 @@ def button1_released():
 
             t0 = time.time()
             print(f"Transcribing ({source})...")
-            model = whisper.load_model("tiny", device="cpu")
-            result = model.transcribe(latest_file, language=source)
+            model_to_use = WHISPER_MODEL_EN if source == "en" else WHISPER_MODEL
+            result = model_to_use.transcribe(latest_file, language=source)
             recognized = result["text"].strip()
             t1 = time.time()
             print("Recognized text:", recognized)
@@ -642,8 +647,8 @@ def button2_released():
 
             t0 = time.time()
             print(f"Transcribing ({source})...")
-            model = whisper.load_model("tiny", device="cpu")
-            result = model.transcribe(latest_file, language=source)
+            model_to_use = WHISPER_MODEL_EN if source == "en" else WHISPER_MODEL
+            result = model_to_use.transcribe(latest_file, language=source)
             recognized = result["text"].strip()
             t1 = time.time()
             print("Recognized text:", recognized)
