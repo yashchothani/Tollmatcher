@@ -33,6 +33,136 @@ try:
 except Exception as e:
     print(f"Warning: Model warmup failed: {e}")
 
+def optimize_audio_file(input_file):
+    """Optimize audio file for faster transcription by trimming and normalizing"""
+    try:
+        import librosa
+        import soundfile as sf
+
+        y, sr = librosa.load(input_file, sr=16000)
+        y_trimmed, _ = librosa.effects.trim(y, top_db=20)
+        optimized_file = input_file.replace('.wav', '_optimized.wav')
+        sf.write(optimized_file, y_trimmed, sr)
+        print(f"Audio optimized: {input_file} -> {optimized_file}")
+        return optimized_file
+
+    except ImportError as e:
+        print(f"CRITICAL: librosa/soundfile not available: {e}")
+        print("Installing required packages...")
+        import subprocess
+        try:
+            subprocess.run(["pip", "install", "librosa", "soundfile"], check=True)
+            print("Packages installed successfully. Please restart the application.")
+            return input_file
+        except Exception as install_error:
+            print(f"Failed to install packages: {install_error}")
+            print("Using fallback optimization...")
+            return fallback_audio_optimization(input_file)
+    except Exception as e:
+        print(f"Warning: Audio optimization failed: {e}, using fallback")
+        return fallback_audio_optimization(input_file)
+
+def fallback_audio_optimization(input_file):
+    """Fallback audio optimization using basic Python libraries"""
+    try:
+        import wave as wav_mod
+        import numpy as np
+
+        with wav_mod.open(input_file, 'rb') as wav_file:
+            frames = wav_file.readframes(-1)
+            sample_rate = wav_file.getframerate()
+            channels = wav_file.getnchannels()
+            sample_width = wav_file.getsampwidth()
+
+        if sample_width == 1:
+            dtype = np.uint8
+        elif sample_width == 2:
+            dtype = np.int16
+        elif sample_width == 4:
+            dtype = np.int32
+        else:
+            print("Unsupported sample width, using original file")
+            return input_file
+
+        audio_data = np.frombuffer(frames, dtype=dtype)
+        threshold = np.max(np.abs(audio_data)) * 0.01
+        non_silent = np.abs(audio_data) > threshold
+
+        if np.any(non_silent):
+            first_non_silent = np.argmax(non_silent)
+            last_non_silent = len(non_silent) - np.argmax(non_silent[::-1])
+            audio_data = audio_data[first_non_silent:last_non_silent]
+
+        if sample_rate > 16000:
+            downsample_factor = sample_rate // 16000
+            audio_data = audio_data[::downsample_factor]
+            sample_rate = 16000
+
+        optimized_file = input_file.replace('.wav', '_optimized.wav')
+        with wav_mod.open(optimized_file, 'wb') as wav_file:
+            wav_file.setnchannels(channels)
+            wav_file.setsampwidth(sample_width)
+            wav_file.setframerate(sample_rate)
+            wav_file.writeframes(audio_data.tobytes())
+
+        print(f"Fallback audio optimization completed: {optimized_file}")
+        return optimized_file
+
+    except Exception as e:
+        print(f"Fallback optimization failed: {e}, using original file")
+        return input_file
+
+def cleanup_memory():
+    """Clean up memory to prevent accumulation"""
+    gc.collect()
+    memory_usage = psutil.virtual_memory().percent
+    if memory_usage > 80:
+        print(f"Warning: High memory usage ({memory_usage:.1f}%), forcing cleanup")
+        gc.collect()
+
+def log_performance_metrics(stt_time, translation_time, tts_time, total_time, audio_file):
+    """Log performance metrics for monitoring"""
+    try:
+        file_size = os.path.getsize(audio_file) if os.path.exists(audio_file) else 0
+        file_size_mb = file_size / (1024 * 1024)
+        print(f"[Performance] STT: {stt_time:.2f}s, Translation: {translation_time:.2f}s, TTS: {tts_time:.2f}s, Total: {total_time:.2f}s, File: {file_size_mb:.2f}MB")
+        if stt_time > 10:
+            print(f"WARNING: STT time ({stt_time:.2f}s) is unusually high!")
+        if total_time > 30:
+            print(f"WARNING: Total processing time ({total_time:.2f}s) is very high!")
+    except Exception as e:
+        print(f"Performance logging error: {e}")
+
+def transcribe_with_optimization(model, audio_file, language):
+    """Transcribe with performance optimizations"""
+    cleanup_memory()
+    optimized_file = optimize_audio_file(audio_file)
+    try:
+        segments, info = model.transcribe(
+            optimized_file,
+            language=language,
+            beam_size=1,
+            best_of=1,
+            temperature=0.0,
+            compression_ratio_threshold=2.4,
+            log_prob_threshold=-1.0,
+            no_speech_threshold=0.6,
+            condition_on_previous_text=False,
+            initial_prompt=None,
+            word_timestamps=False,
+            prepend_punctuations="\"'([{-",
+            append_punctuations="\"'.!?:;)",
+        )
+        recognized = " ".join([segment.text for segment in segments]).strip()
+        if optimized_file != audio_file and os.path.exists(optimized_file):
+            os.remove(optimized_file)
+        return recognized
+    except Exception as e:
+        print(f"Transcription error: {e}")
+        if optimized_file != audio_file and os.path.exists(optimized_file):
+            os.remove(optimized_file)
+        raise e
+
 # Button pin definitions
 BUTTON1_PIN = 27  # button1 - guest mic
 BUTTON2_PIN = 22  # button2 - user mic
@@ -561,8 +691,7 @@ def button1_released():
             t0 = time.time()
             print(f"Transcribing ({source})...")
             model_to_use = WHISPER_MODEL_EN if source == "en" else WHISPER_MODEL
-            segments, _ = model_to_use.transcribe(latest_file, language=source)
-            recognized = " ".join(s.text for s in segments).strip()
+            recognized = transcribe_with_optimization(model_to_use, latest_file, source)
             t1 = time.time()
             print("Recognized text:", recognized)
             print(f"[Time] STT took {t1 - t0:.2f} seconds")
@@ -578,6 +707,7 @@ def button1_released():
             t3 = time.time()
             print(f"[Time] TTS took {t3 - t2:.2f} seconds")
             print(f"[Total Time] {t3 - t0:.2f} seconds")
+            log_performance_metrics(t1-t0, t2-t1, t3-t2, t3-t0, latest_file)
 
         except Exception as e:
             print(f"Error in transcription, translation, or TTS: {e}")
@@ -659,8 +789,7 @@ def button2_released():
             t0 = time.time()
             print(f"Transcribing ({source})...")
             model_to_use = WHISPER_MODEL_EN if source == "en" else WHISPER_MODEL
-            segments, _ = model_to_use.transcribe(latest_file, language=source)
-            recognized = " ".join(s.text for s in segments).strip()
+            recognized = transcribe_with_optimization(model_to_use, latest_file, source)
             t1 = time.time()
             print("Recognized text:", recognized)
             print(f"[Time] STT took {t1 - t0:.2f} seconds")
@@ -676,6 +805,7 @@ def button2_released():
             t3 = time.time()
             print(f"[Time] TTS took {t3 - t2:.2f} seconds")
             print(f"[Total Time] {t3 - t0:.2f} seconds")
+            log_performance_metrics(t1-t0, t2-t1, t3-t2, t3-t0, latest_file)
 
         except Exception as e:
             print(f"Error in transcription, translation, or TTS: {e}")
