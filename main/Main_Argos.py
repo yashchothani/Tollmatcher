@@ -163,6 +163,36 @@ def transcribe_with_optimization(model, audio_file, language):
             os.remove(optimized_file)
         raise e
 
+# Audio device configuration (overridable via environment variables)
+CONFIRM_AUDIO_DEVICE = os.getenv("CONFIRM_AUDIO_DEVICE", "plughw:CARD=USB,DEV=0")
+GUEST_TTS_DEVICE = os.getenv("GUEST_TTS_DEVICE", "plughw:CARD=USB,DEV=0")
+USER_TTS_DEVICE = os.getenv("USER_TTS_DEVICE", "plughw:CARD=UACDemoV10,DEV=0")
+
+PIPER_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../piper_rebuild/piper/piper'))
+OUTPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../output'))
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+piper_models = {
+    "en": ("en_US-john-medium.onnx", "en_US-john-medium.onnx.json"),
+    "de": ("de_DE-thorsten-medium.onnx", "de_DE-thorsten-medium.onnx.json"),
+    "es": ("es_ES-carlfm-x_low.onnx", "es_ES-carlfm-x_low.onnx.json"),
+    "fr": ("fr_FR-tom-medium.onnx", "fr_FR-tom-medium.onnx.json"),
+    "uk": ("uk_UA-lada-x_low.onnx", "uk_UA-lada-x_low.onnx.json"),
+    "it": ("it_IT-paola-medium.onnx", "it_IT-paola-medium.onnx.json"),
+    "ca": ("ca_ES-upc_ona-x_low.onnx", "ca_ES-upc_ona-x_low.onnx.json"),
+    "ar": ("ar_JO-kareem-low.onnx", "ar_JO-kareem-low.onnx.json"),
+    "nl": ("nl_NL-pim-medium.onnx", "nl_NL-pim-medium.onnx.json"),
+    "zh": ("zh_CN-huayan-medium.onnx", "zh_CN-huayan-medium.onnx.json"),
+}
+
+piper_args_base = {}
+for lang, (model, config) in piper_models.items():
+    piper_args_base[lang] = [
+        PIPER_PATH,
+        "--model", os.path.abspath(os.path.join(os.path.dirname(__file__), f"../piper_rebuild/piper/{model}")),
+        "--config", os.path.abspath(os.path.join(os.path.dirname(__file__), f"../piper_rebuild/piper/{config}")),
+    ]
+
 # Button pin definitions
 BUTTON1_PIN = 27  # button1 - guest mic
 BUTTON2_PIN = 22  # button2 - user mic
@@ -171,8 +201,8 @@ BUTTON4_PIN = 21  # button4 - select target language
 
 button1 = Button(BUTTON1_PIN, pull_up=True, bounce_time=0.2)
 button2 = Button(BUTTON2_PIN, pull_up=True, bounce_time=0.2)
-button3 = Button(BUTTON3_PIN)
-button4 = Button(BUTTON4_PIN)
+button3 = Button(BUTTON3_PIN, pull_up=True, bounce_time=0.2)
+button4 = Button(BUTTON4_PIN, pull_up=True, bounce_time=0.2)
 
 SYSTEM_BUTTON_PIN = 4
 system_button = Button(SYSTEM_BUTTON_PIN, hold_time=3, pull_up=True)
@@ -344,7 +374,7 @@ def play_audio(lang_code, owner=None, allow_interrupt_from=None):
 
         current_audio_owner = owner
         interrupt_whitelist = set(allow_interrupt_from or [])
-        current_audio_process = subprocess.Popen(['aplay', '-D', 'plughw:CARD=USB,DEV=0', path])
+        current_audio_process = subprocess.Popen(['aplay', '-D', CONFIRM_AUDIO_DEVICE, path])
 
         # Start monitor thread to clear owner when playback finishes
         threading.Thread(target=monitor_audio_completion, args=(owner,), daemon=True).start()
@@ -555,63 +585,12 @@ def record_loop(recorder, stop_flag_name):
         time.sleep(0.01)
 
 def speak_with_piper(text, lang_code, device):
-    piper_models = {
-        "en": {
-            "model": "en_US-john-medium.onnx",
-            "config": "en_US-john-medium.onnx.json"
-        },
-        "de": {
-            "model": "de_DE-thorsten-medium.onnx",
-            "config": "de_DE-thorsten-medium.onnx.json"
-        },
-	    "es": {
-            "model": "es_ES-carlfm-x_low.onnx",
-            "config": "es_ES-carlfm-x_low.onnx.json"
-        },
-        "fr": {
-            "model": "fr_FR-tom-medium.onnx",
-            "config": "fr_FR-tom-medium.onnx.json"
-        },
-        "uk": {
-            "model": "uk_UA-lada-x_low.onnx",
-            "config": "uk_UA-lada-x_low.onnx.json"
-        },    
-        "it": {
-            "model": "it_IT-paola-medium.onnx",
-            "config": "it_IT-paola-medium.onnx.json"
-        },    
-        "ca": {
-            "model": "ca_ES-upc_ona-x_low.onnx",
-            "config": "ca_ES-upc_ona-x_low.onnx.json"
-        },    
-        "ar": {
-            "model": "ar_JO-kareem-low.onnx",
-            "config": "ar_JO-kareem-low.onnx.json"
-        },    
-        "nl": {
-            "model": "nl_NL-pim-medium.onnx",
-            "config": "nl_NL-pim-medium.onnx.json"
-        },    
-        "zh": {
-            "model": "zh_CN-huayan-medium.onnx",
-             "config": "zh_CN-huayan-medium.onnx.json"
-        }
-    }
-
-    PIPER_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../piper_rebuild/piper/piper'))
-    OUTPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../output'))
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    voice = piper_models[lang_code]
     timestamp = int(time.time())
     output_file = os.path.join(OUTPUT_DIR, f"{lang_code}_{timestamp}.wav")
-
-    command = [
-        PIPER_PATH,
-        "--model", os.path.abspath(os.path.join(os.path.dirname(__file__), f"../piper_rebuild/piper/{voice['model']}")),
-        "--config", os.path.abspath(os.path.join(os.path.dirname(__file__), f"../piper_rebuild/piper/{voice['config']}")),
-        "--output_file", output_file,
-    ]
+    base = piper_args_base.get(lang_code)
+    if not base:
+        raise ValueError(f"No Piper model configured for language: {lang_code}")
+    command = base + ["--output_file", output_file]
 
     print("Synthesizing speech with Piper...")
     process = subprocess.Popen(command, stdin=subprocess.PIPE)
@@ -703,7 +682,7 @@ def button1_released():
             print(f"[Time] Translation took {t2 - t1:.2f} seconds")
 
             print("Speaking with Piper...")
-            speak_with_piper(translation, target, device="plughw:CARD=USB,DEV=0")
+            speak_with_piper(translation, target, device=GUEST_TTS_DEVICE)
             t3 = time.time()
             print(f"[Time] TTS took {t3 - t2:.2f} seconds")
             print(f"[Total Time] {t3 - t0:.2f} seconds")
@@ -801,7 +780,7 @@ def button2_released():
             print(f"[Time] Translation took {t2 - t1:.2f} seconds")
 
             print("Speaking with Piper...")
-            speak_with_piper(translation, target, device="plughw:CARD=UACDemoV10,DEV=0")
+            speak_with_piper(translation, target, device=USER_TTS_DEVICE)
             t3 = time.time()
             print(f"[Time] TTS took {t3 - t2:.2f} seconds")
             print(f"[Total Time] {t3 - t0:.2f} seconds")
