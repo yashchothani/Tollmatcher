@@ -27,8 +27,9 @@ WHISPER_MODEL_EN = WhisperModel("tiny.en", device="cpu", compute_type="int8", nu
 # Model warmup to ensure consistent performance
 print("Warming up Whisper models...")
 try:
+    # Warmup with a short dummy transcription
     dummy_segments, _ = WHISPER_MODEL.transcribe("dummy", language="en")
-    list(dummy_segments)
+    list(dummy_segments)  # Consume the generator
     print("Whisper models warmed up successfully")
 except Exception as e:
     print(f"Warning: Model warmup failed: {e}")
@@ -38,14 +39,19 @@ def optimize_audio_file(input_file):
     try:
         import librosa
         import soundfile as sf
-
-        y, sr = librosa.load(input_file, sr=16000)
+        
+        # Load audio and trim silence
+        y, sr = librosa.load(input_file, sr=16000)  # Resample to 16kHz for faster processing
+        
+        # Trim silence from beginning and end
         y_trimmed, _ = librosa.effects.trim(y, top_db=20)
+        
+        # Save optimized audio (no duration limitation)
         optimized_file = input_file.replace('.wav', '_optimized.wav')
         sf.write(optimized_file, y_trimmed, sr)
         print(f"Audio optimized: {input_file} -> {optimized_file}")
         return optimized_file
-
+        
     except ImportError as e:
         print(f"CRITICAL: librosa/soundfile not available: {e}")
         print("Installing required packages...")
@@ -65,15 +71,17 @@ def optimize_audio_file(input_file):
 def fallback_audio_optimization(input_file):
     """Fallback audio optimization using basic Python libraries"""
     try:
-        import wave as wav_mod
+        import wave
         import numpy as np
-
-        with wav_mod.open(input_file, 'rb') as wav_file:
+        
+        # Read original audio file
+        with wave.open(input_file, 'rb') as wav_file:
             frames = wav_file.readframes(-1)
             sample_rate = wav_file.getframerate()
             channels = wav_file.getnchannels()
             sample_width = wav_file.getsampwidth()
-
+        
+        # Convert to numpy array for processing
         if sample_width == 1:
             dtype = np.uint8
         elif sample_width == 2:
@@ -83,31 +91,36 @@ def fallback_audio_optimization(input_file):
         else:
             print("Unsupported sample width, using original file")
             return input_file
-
+            
         audio_data = np.frombuffer(frames, dtype=dtype)
-        threshold = np.max(np.abs(audio_data)) * 0.01
+        
+        # Simple silence detection and trimming
+        # Find first and last non-silent samples
+        threshold = np.max(np.abs(audio_data)) * 0.01  # 1% of max amplitude
         non_silent = np.abs(audio_data) > threshold
-
+        
         if np.any(non_silent):
             first_non_silent = np.argmax(non_silent)
             last_non_silent = len(non_silent) - np.argmax(non_silent[::-1])
             audio_data = audio_data[first_non_silent:last_non_silent]
-
+        
+        # Resample to 16kHz if needed (simple downsampling)
         if sample_rate > 16000:
             downsample_factor = sample_rate // 16000
             audio_data = audio_data[::downsample_factor]
             sample_rate = 16000
-
+        
+        # Save optimized audio
         optimized_file = input_file.replace('.wav', '_optimized.wav')
-        with wav_mod.open(optimized_file, 'wb') as wav_file:
+        with wave.open(optimized_file, 'wb') as wav_file:
             wav_file.setnchannels(channels)
             wav_file.setsampwidth(sample_width)
             wav_file.setframerate(sample_rate)
             wav_file.writeframes(audio_data.tobytes())
-
+        
         print(f"Fallback audio optimization completed: {optimized_file}")
         return optimized_file
-
+        
     except Exception as e:
         print(f"Fallback optimization failed: {e}, using original file")
         return input_file
@@ -123,42 +136,60 @@ def cleanup_memory():
 def log_performance_metrics(stt_time, translation_time, tts_time, total_time, audio_file):
     """Log performance metrics for monitoring"""
     try:
+        # Get file size for context
         file_size = os.path.getsize(audio_file) if os.path.exists(audio_file) else 0
         file_size_mb = file_size / (1024 * 1024)
+        
+        # Log performance metrics
         print(f"[Performance] STT: {stt_time:.2f}s, Translation: {translation_time:.2f}s, TTS: {tts_time:.2f}s, Total: {total_time:.2f}s, File: {file_size_mb:.2f}MB")
+        
+        # Alert if performance is degrading
         if stt_time > 10:
-            print(f"WARNING: STT time ({stt_time:.2f}s) is unusually high!")
+            print(f"⚠️  WARNING: STT time ({stt_time:.2f}s) is unusually high!")
         if total_time > 30:
-            print(f"WARNING: Total processing time ({total_time:.2f}s) is very high!")
+            print(f"⚠️  WARNING: Total processing time ({total_time:.2f}s) is very high!")
+            
     except Exception as e:
         print(f"Performance logging error: {e}")
 
 def transcribe_with_optimization(model, audio_file, language):
     """Transcribe with performance optimizations"""
+    # Clean up memory before transcription
     cleanup_memory()
+    
+    # Optimize audio file
     optimized_file = optimize_audio_file(audio_file)
+    
     try:
+        # Use optimized transcription parameters
         segments, info = model.transcribe(
-            optimized_file,
+            optimized_file, 
             language=language,
-            beam_size=1,
-            best_of=1,
-            temperature=0.0,
+            beam_size=1,  # Faster beam search
+            best_of=1,    # Only return best result
+            temperature=0.0,  # Deterministic output
             compression_ratio_threshold=2.4,
             log_prob_threshold=-1.0,
             no_speech_threshold=0.6,
-            condition_on_previous_text=False,
+            condition_on_previous_text=False,  # Faster processing
             initial_prompt=None,
-            word_timestamps=False,
+            word_timestamps=False,  # Disable word-level timestamps for speed
             prepend_punctuations="\"'([{-",
-            append_punctuations="\"'.!?:;)",
+            append_punctuations="\"'.!?:;,)",
         )
+        
+        # Convert generator to list efficiently
         recognized = " ".join([segment.text for segment in segments]).strip()
+        
+        # Clean up optimized file if it was created
         if optimized_file != audio_file and os.path.exists(optimized_file):
             os.remove(optimized_file)
+            
         return recognized
+        
     except Exception as e:
         print(f"Transcription error: {e}")
+        # Fallback to original file
         if optimized_file != audio_file and os.path.exists(optimized_file):
             os.remove(optimized_file)
         raise e
@@ -168,6 +199,7 @@ CONFIRM_AUDIO_DEVICE = os.getenv("CONFIRM_AUDIO_DEVICE", "plughw:CARD=USB,DEV=0"
 GUEST_TTS_DEVICE = os.getenv("GUEST_TTS_DEVICE", "plughw:CARD=USB,DEV=0")
 USER_TTS_DEVICE = os.getenv("USER_TTS_DEVICE", "plughw:CARD=UACDemoV10,DEV=0")
 
+# Precompute Piper executable path, output dir, and per-language args once
 PIPER_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../piper_rebuild/piper/piper'))
 OUTPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../output'))
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -258,7 +290,6 @@ audio_map = {
     'en_uk': os.path.join(os.path.dirname(__file__), '../languages/en_uk.wav'), 
     'en_it': os.path.join(os.path.dirname(__file__), '../languages/en_it.wav'), 
     'en_ca': os.path.join(os.path.dirname(__file__), '../languages/en_ca.wav'), 
-    'en_ca': os.path.join(os.path.dirname(__file__), '../languages/en_ca.wav'), 
     'en_nl': os.path.join(os.path.dirname(__file__), '../languages/en_nl.wav'), 
     
     'de_zh': os.path.join(os.path.dirname(__file__), '../languages/de_zh.wav'),            
@@ -308,7 +339,7 @@ audio_map = {
     'it_fr': os.path.join(os.path.dirname(__file__), '../languages/it_fr.wav'), 
     'it_uk': os.path.join(os.path.dirname(__file__), '../languages/it_uk.wav'), 
     'it_ca': os.path.join(os.path.dirname(__file__), '../languages/it_ca.wav'), 
-    'it_ca': os.path.join(os.path.dirname(__file__), '../languages/it_ar.wav'), 
+    'it_ar': os.path.join(os.path.dirname(__file__), '../languages/it_ar.wav'), 
     'it_nl': os.path.join(os.path.dirname(__file__), '../languages/it_nl.wav'), 
     
     'ca_zh': os.path.join(os.path.dirname(__file__), '../languages/ca_zh.wav'),   
@@ -462,35 +493,51 @@ def select_source():
 # couldn't be interrupted by any other button expect itself
 
 
-#Argos
+# Argos caching: installed languages and translation paths
+installed_languages = argostranslate.translate.get_installed_languages()
+language_by_code = {lang.code: lang for lang in installed_languages}
+translation_cache = {}  # (src, tgt) -> (kind, obj) where kind in {"direct", "via_en"}
+
 def translate_text(source_lang_code, target_lang_code, text):
-    installed_languages = argostranslate.translate.get_installed_languages()
-    
-    from_lang = next((lang for lang in installed_languages if lang.code == source_lang_code), None)
-    to_lang = next((lang for lang in installed_languages if lang.code == target_lang_code), None)
-    en_lang = next((lang for lang in installed_languages if lang.code == 'en'), None)
+    key = (source_lang_code, target_lang_code)
+    cached = translation_cache.get(key)
 
-    if not from_lang or not to_lang:
-        return f"Error: Either '{source_lang_code}' or '{target_lang_code}' language is not installed."
+    if cached is None:
+        from_lang = language_by_code.get(source_lang_code)
+        to_lang = language_by_code.get(target_lang_code)
+        en_lang = language_by_code.get('en')
 
-    # Try direct translation
-    try:
-        direct_translation = from_lang.get_translation(to_lang)
-        return direct_translation.translate(text)
-    except Exception:
-        pass  # direct translation not available
+        if not from_lang or not to_lang:
+            translation_cache[key] = None
+            return f"Error: Either '{source_lang_code}' or '{target_lang_code}' language is not installed."
 
-    # Try using English as intermediate
-    if en_lang:
+        # Try direct translation path
         try:
-            to_en = from_lang.get_translation(en_lang)
-            intermediate = to_en.translate(text)
-            from_en = en_lang.get_translation(to_lang)
-            return from_en.translate(intermediate)
+            direct = from_lang.get_translation(to_lang)
+            translation_cache[key] = ("direct", direct)
         except Exception:
-            return f"Error: Cannot find translation path from '{source_lang_code}' to '{target_lang_code}' (even with English as bridge)."
+            # Try via English bridge
+            if en_lang:
+                try:
+                    to_en = from_lang.get_translation(en_lang)
+                    from_en = en_lang.get_translation(to_lang)
+                    translation_cache[key] = ("via_en", (to_en, from_en))
+                except Exception:
+                    translation_cache[key] = None
+            else:
+                translation_cache[key] = None
+
+        cached = translation_cache.get(key)
+
+    if cached is None:
+        return f"Error: Cannot find translation path from '{source_lang_code}' to '{target_lang_code}' (even with English as bridge)."
+
+    kind, obj = cached
+    if kind == "direct":
+        return obj.translate(text)
     else:
-        return "Error: English language model is not installed for bridging translation."
+        to_en, from_en = obj
+        return from_en.translate(to_en.translate(text))
 
 
 class AudioRecorder:
@@ -571,6 +618,7 @@ user_thread = None
 stop_guest = False
 stop_user = False
 
+# will remove this function
 def get_latest_recording(folder_name):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     folder = os.path.join(base_dir, "..", folder_name)
@@ -587,6 +635,8 @@ def record_loop(recorder, stop_flag_name):
 def speak_with_piper(text, lang_code, device):
     timestamp = int(time.time())
     output_file = os.path.join(OUTPUT_DIR, f"{lang_code}_{timestamp}.wav")
+
+    # Build command by extending precomputed base args
     base = piper_args_base.get(lang_code)
     if not base:
         raise ValueError(f"No Piper model configured for language: {lang_code}")
@@ -608,12 +658,15 @@ def button1_pressed():
         return
 
     system_locked_by = "button1"  
-    interrupt_audio_playback("button1")
+    if not interrupt_audio_playback("button1"):
+        system_locked_by = None
+        return
 
     global guest_thread, stop_guest, guest_button_confirmed, guest_record_start_time
 
     if current_audio_owner in ["button3", "button4"]:
         print("Playback from Button3/4 is active. Button1 recording blocked.")
+        system_locked_by = None
         return
     
     source = selected_langs['source']
@@ -625,9 +678,10 @@ def button1_pressed():
         return
 
     if guest_recorder.is_recording:
+        system_locked_by = None
         return
 
-    print("Button1 pressed ΓÇö start recording immediately")
+    print("Button1 pressed — start recording immediately")
     guest_button_confirmed = False
     guest_record_start_time = time.time()
 
@@ -650,17 +704,17 @@ def button1_released():
     guest_thread.join()
     guest_recorder.stop_recording()
     
-    latest_file = get_latest_recording("guest_mic_recordings")
+    latest_file = guest_recorder.get_last_filepath()
     if duration < 1.0:  # Have to hold button1 more than 1s
-        print("Button1 released too early ΓÇö delete latest recording")
+        print("Button1 released too early — delete latest recording")
         if latest_file and os.path.exists(latest_file):
             os.remove(latest_file)
         system_locked_by = None
         return
 
-    print("Button1 released after 1s ΓÇö continue with STT + translation + TTS")
+    print("Button1 released after 1s — continue with STT + translation + TTS")
 
-    latest_file = get_latest_recording("guest_mic_recordings")
+    latest_file = guest_recorder.get_last_filepath()
     if latest_file:
         print(f"Latest guest recording: {latest_file}")
         try:
@@ -686,6 +740,8 @@ def button1_released():
             t3 = time.time()
             print(f"[Time] TTS took {t3 - t2:.2f} seconds")
             print(f"[Total Time] {t3 - t0:.2f} seconds")
+            
+            # Log performance metrics
             log_performance_metrics(t1-t0, t2-t1, t3-t2, t3-t0, latest_file)
 
         except Exception as e:
@@ -703,12 +759,15 @@ def button2_pressed():
         print(f"System is locked by {system_locked_by}. Button2 cannot operate.")
         return
     system_locked_by = "button2" 
-    interrupt_audio_playback("button2")
+    if not interrupt_audio_playback("button2"):
+        system_locked_by = None
+        return
 
     global user_thread, stop_user, user_button_confirmed, user_record_start_time
 
     if current_audio_owner in ["button3", "button4"]:
         print("Playback from Button3/4 is active. Button2 recording blocked.")
+        system_locked_by = None
         return
 
     source = selected_langs['source']
@@ -720,9 +779,10 @@ def button2_pressed():
         return
 
     if user_recorder.is_recording:
+        system_locked_by = None
         return
 
-    print("Button2 pressed ΓÇö start recording immediately")
+    print("Button2 pressed — start recording immediately")
     user_button_confirmed = False
     user_record_start_time = time.time()
 
@@ -747,17 +807,17 @@ def button2_released():
     user_thread.join()
     user_recorder.stop_recording()
 
-    latest_file = get_latest_recording("user_mic_recordings")
+    latest_file = user_recorder.get_last_filepath()
     if duration < 1.0: # Have to hold button2 more than 1s
-        print("Button2 released too early ΓÇö delete latest recording")
+        print("Button2 released too early — delete latest recording")
         if latest_file and os.path.exists(latest_file):
             os.remove(latest_file)
         system_locked_by = None
         return
         
-    print("Button2 released after 1s ΓÇö continue with STT + translation + TTS")
+    print("Button2 released after 1s — continue with STT + translation + TTS")
 
-    latest_file = get_latest_recording("user_mic_recordings")
+    latest_file = user_recorder.get_last_filepath()
     if latest_file:
         print(f"Latest user recording: {latest_file}")
         try:
@@ -780,10 +840,12 @@ def button2_released():
             print(f"[Time] Translation took {t2 - t1:.2f} seconds")
 
             print("Speaking with Piper...")
-            speak_with_piper(translation, target, device=USER_TTS_DEVICE)
+            speak_with_piper(translation, target, device=USER_TTS_DEVICE) # configurable speaker
             t3 = time.time()
             print(f"[Time] TTS took {t3 - t2:.2f} seconds")
             print(f"[Total Time] {t3 - t0:.2f} seconds")
+            
+            # Log performance metrics
             log_performance_metrics(t1-t0, t2-t1, t3-t2, t3-t0, latest_file)
 
         except Exception as e:
