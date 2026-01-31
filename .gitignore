@@ -1,5 +1,6 @@
 .DS_Store
-tollmachter-venv/
+tollmatcher-env/
+tollmatcher-venv/
 __pycache__/
 
 guest_mic_recordings/*

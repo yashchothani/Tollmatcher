@@ -2,9 +2,9 @@
 
 set -e
 
-echo ">>> Creating virtual environment at ~/tollmachter-env..."
-python3 -m venv ~/tollmachter-env
-source ~/tollmachter-env/bin/activate
+echo ">>> Creating virtual environment at ~/tollmatcher-env..."
+python3 -m venv ~/tollmatcher-env
+source ~/tollmatcher-env/bin/activate
 
 echo ">>> Installing dependencies from requirements.txt..."
 pip install -r "$(dirname "$0")/requirements.txt"
