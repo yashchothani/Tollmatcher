@@ -42,10 +42,10 @@ chmod +x setup.sh
 
 This will:
 
-- Create virtual environment at `~/tollmachter-env`
+- Create virtual environment at `~/tollmatcher-env`
 - Install all dependencies
 - Copy and enable systemd service
-- Start the translator automatically
+- Start Tollmatcher automatically
 
 ### 2. Install translation models
 
