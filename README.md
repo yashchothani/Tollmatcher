@@ -66,7 +66,7 @@ argospm list
 ### 3. Verify service status
 
 ```bash
-sudo systemctl status offline_translator.service
+sudo systemctl status tollmatcher.service
 ```
 
 ### 4. About the start script (auto-start on boot)
@@ -157,7 +157,7 @@ The start script uses these defaults; Main_Argos.py waits for `sysdefault:CARD=U
 
 ### Systemd Service
 
-The service runs when the Pi boots. Edit `/etc/systemd/system/offline_translator.service` to:
+The service runs when the Pi boots. Edit `/etc/systemd/system/tollmatcher.service` to:
 
 - Use the start script for auto-start (recommended): `ExecStart=/path/to/Tollmatcher/main/start_tollmatcher.sh` so USB/audio get time to initialize and env vars are set
 - Or run Main_Argos.py directly
@@ -169,7 +169,7 @@ After changes:
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl restart offline_translator.service
+sudo systemctl restart tollmatcher.service
 ```
 
 ---
@@ -189,7 +189,7 @@ Tollmatcher/
 ├── user_mic_recordings/            # User audio recordings
 ├── output/                         # Generated TTS audio files
 ├── system/
-│   └── offline_translator.service  # Systemd service file
+│   └── tollmatcher.service          # Systemd service file
 ├── requirements.txt                # Python dependencies
 ├── setup.sh                        # Automated setup script
 └── README.md
@@ -222,7 +222,7 @@ Tollmatcher/
 ### Service not starting
 
 ```bash
-sudo journalctl -u offline_translator.service -f
+sudo journalctl -u tollmatcher.service -f
 ```
 
 ### Audio device issues
@@ -248,7 +248,7 @@ Check GPIO connections and pull-up resistor configuration in code.
 
 ### "Another instance is already running"
 
-Main_Argos.py uses a single-instance lock. Stop the other process (e.g. `sudo systemctl stop offline_translator.service`) or remove the lock only if you are sure no instance is running: `rm -f /tmp/tollmatcher.lock`.
+Main_Argos.py uses a single-instance lock. Stop the other process (e.g. `sudo systemctl stop tollmatcher.service`) or remove the lock only if you are sure no instance is running: `rm -f /tmp/tollmatcher.lock`.
 
 ---
 
@@ -277,7 +277,7 @@ Only one instance of Main_Argos.py can run at a time (lock file: `/tmp/tollmatch
 ### Stop the service first (when running manually)
 
 ```bash
-sudo systemctl stop offline_translator.service
+sudo systemctl stop tollmatcher.service
 ```
 
 ---
