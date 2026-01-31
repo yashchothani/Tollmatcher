@@ -2,6 +2,11 @@
 # And then Button1 function or Button2 function using gpiozero to record sounds
 # will use 2 sets of specific hardwares to record and replay the translation
 # How to test? 1. activate virtual env 2. connect 4 buttons rightly 3. run test
+
+# USB Audio devices (check with: cat /proc/asound/cards)
+# "USB"        -> EPOS PC 7 USB headset (headphone for User - confirmations & guest's translation)
+# "Device"     -> GeneralPlus USB Audio Device (speaker for Guest - user's translation)
+# "microphone" -> MUSIC-BOOST usb microphone (recording input)
 from gpiozero import Button
 import threading
 import time
@@ -16,8 +21,29 @@ import argostranslate.package
 import argostranslate.translate
 import gc
 import psutil
+import sys
+import atexit
+
+# Single-instance lock: prevent multiple instances from running
+LOCK = "/tmp/tollmatcher.lock"
+
+if os.path.exists(LOCK):
+    print("Another instance is already running. Exiting.")
+    sys.exit(1)
+
+with open(LOCK, "w") as f:
+    f.write(str(os.getpid()))
+
+atexit.register(lambda: os.remove(LOCK) if os.path.exists(LOCK) else None)
 
 warnings.filterwarnings("ignore", message="FP16 is not supported on CPU; using FP32 instead")
+
+# Guard: Wait for USB audio device before any audio is played
+while True:
+    out = subprocess.getoutput("aplay -L")
+    if "sysdefault:CARD=USB" in out:
+        break
+    time.sleep(0.5)
 
 # Preload Whisper models once at startup to avoid per-call load latency
 # Use faster-whisper for better performance with same accuracy
@@ -195,9 +221,11 @@ def transcribe_with_optimization(model, audio_file, language):
         raise e
 
 # Audio device configuration (overridable via environment variables)
-CONFIRM_AUDIO_DEVICE = os.getenv("CONFIRM_AUDIO_DEVICE", "plughw:CARD=USB,DEV=0")
-GUEST_TTS_DEVICE = os.getenv("GUEST_TTS_DEVICE", "plughw:CARD=USB,DEV=0")
-USER_TTS_DEVICE = os.getenv("USER_TTS_DEVICE", "plughw:CARD=UACDemoV10,DEV=0")
+# GUEST_TTS_DEVICE = Button1 output (guest speaks source -> translated to target)
+# USER_TTS_DEVICE = Button2 output (user speaks target -> translated to source)
+CONFIRM_AUDIO_DEVICE = os.getenv("CONFIRM_AUDIO_DEVICE", "sysdefault:CARD=USB")
+GUEST_TTS_DEVICE = os.getenv("GUEST_TTS_DEVICE", "sysdefault:CARD=USB")
+USER_TTS_DEVICE = os.getenv("USER_TTS_DEVICE", "sysdefault:CARD=Device")
 
 # Precompute Piper executable path, output dir, and per-language args once
 PIPER_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../piper_rebuild/piper/piper'))
@@ -235,6 +263,32 @@ button1 = Button(BUTTON1_PIN, pull_up=True, bounce_time=0.2)
 button2 = Button(BUTTON2_PIN, pull_up=True, bounce_time=0.2)
 button3 = Button(BUTTON3_PIN, pull_up=True, bounce_time=0.2)
 button4 = Button(BUTTON4_PIN, pull_up=True, bounce_time=0.2)
+
+SYSTEM_BUTTON_PIN = 4
+system_button = Button(SYSTEM_BUTTON_PIN, hold_time=3, pull_up=True)
+def handle_system_press():
+    print("System button held down")
+    press_time = time.time()
+    while system_button.is_held:
+        time.sleep(0.1)
+    duration = time.time() - press_time
+    print(f"Held for {duration:.2f} seconds")
+
+    if duration >= 5:
+        print("Rebooting system...")
+        os.system("sudo /sbin/reboot")
+    elif duration >= 3:
+        print("Shutting down system...")
+        os.system("sudo /sbin/shutdown -h now")
+    else:
+        print("Press too short, ignored.")
+
+def system_button_monitor():
+    while True:
+        system_button.wait_for_press()
+        if system_button.is_held:
+            handle_system_press()
+threading.Thread(target=system_button_monitor, daemon=True).start()
 
 system_locked_by = None 
 # For Button1 (Guest Mic) long-press confirmation
@@ -525,7 +579,7 @@ class AudioRecorder:
         self.is_recording = False
         self.device_index = self.get_input_device_index(mic_name)
         self.device_name = self.get_device_name(self.device_index)
-        self.folder_name = folder_name or ("guest_mic_recordings" if "SF-558" in mic_name else "user_mic_recordings") #Button1's mic
+        self.folder_name = folder_name or ("guest_mic_recordings" if "usb microphone" in (mic_name or "").lower() else "user_mic_recordings") #Button1's mic
         self.output_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", self.folder_name)
         os.makedirs(self.output_dir, exist_ok=True)
 
@@ -584,7 +638,7 @@ class AudioRecorder:
     def get_last_filepath(self):
         return getattr(self, "last_filepath", None)
 
-guest_recorder = AudioRecorder(mic_name="SF-558")
+guest_recorder = AudioRecorder(mic_name="usb microphone")
 user_recorder = AudioRecorder(mic_name="EPOS PC 7 USB")
 
 guest_thread = None
@@ -814,7 +868,7 @@ def button2_released():
             print(f"[Time] Translation took {t2 - t1:.2f} seconds")
 
             print("Speaking with Piper...")
-            speak_with_piper(translation, target, device=USER_TTS_DEVICE) # configurable speaker
+            speak_with_piper(translation, target, device=USER_TTS_DEVICE)
             t3 = time.time()
             print(f"[Time] TTS took {t3 - t2:.2f} seconds")
             print(f"[Total Time] {t3 - t0:.2f} seconds")
@@ -843,4 +897,4 @@ try:
 except KeyboardInterrupt:
     guest_recorder.close()
     user_recorder.close()
-    print("Cleaned up and exited.")
+    print("Cleaned up and exited.") 
