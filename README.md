@@ -24,7 +24,7 @@ Real-time bidirectional speech translation device running fully offline on Raspb
   - **Button 2** (GPIO 22) — User microphone trigger
   - **Button 3** (GPIO 20) — Source language selector
   - **Button 4** (GPIO 21) — Target language selector
-- 2 USB microphones (guest: SF-558, user: EPOS PC 7 USB)
+- 2 USB microphones (guest: USB Microphone, user: EPOS PC 7 USB)
 - 2 audio output devices (configurable via environment variables)
 
 ---
