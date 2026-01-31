@@ -10,17 +10,28 @@ import glob
 import subprocess
 import pyaudio
 import wave
-import whisper
+from faster_whisper import WhisperModel
 import warnings
 import argostranslate.package
 import argostranslate.translate
+import gc
+import psutil
 
 warnings.filterwarnings("ignore", message="FP16 is not supported on CPU; using FP32 instead")
 
 # Preload Whisper models once at startup to avoid per-call load latency
-# Use tiny.en for English for better speed/accuracy; fall back to tiny for others
-WHISPER_MODEL = whisper.load_model("tiny", device="cpu")
-WHISPER_MODEL_EN = whisper.load_model("tiny.en", device="cpu")
+# Use faster-whisper for better performance with same accuracy
+WHISPER_MODEL = WhisperModel("tiny", device="cpu", compute_type="int8", num_workers=1)
+WHISPER_MODEL_EN = WhisperModel("tiny.en", device="cpu", compute_type="int8", num_workers=1)
+
+# Model warmup to ensure consistent performance
+print("Warming up Whisper models...")
+try:
+    dummy_segments, _ = WHISPER_MODEL.transcribe("dummy", language="en")
+    list(dummy_segments)
+    print("Whisper models warmed up successfully")
+except Exception as e:
+    print(f"Warning: Model warmup failed: {e}")
 
 # Button pin definitions
 BUTTON1_PIN = 27  # button1 - guest mic
@@ -507,7 +518,7 @@ def button1_pressed():
     if guest_recorder.is_recording:
         return
 
-    print("Button1 pressed — start recording immediately")
+    print("Button1 pressed ΓÇö start recording immediately")
     guest_button_confirmed = False
     guest_record_start_time = time.time()
 
@@ -532,13 +543,13 @@ def button1_released():
     
     latest_file = get_latest_recording("guest_mic_recordings")
     if duration < 1.0:  # Have to hold button1 more than 1s
-        print("Button1 released too early — delete latest recording")
+        print("Button1 released too early ΓÇö delete latest recording")
         if latest_file and os.path.exists(latest_file):
             os.remove(latest_file)
         system_locked_by = None
         return
 
-    print("Button1 released after 1s — continue with STT + translation + TTS")
+    print("Button1 released after 1s ΓÇö continue with STT + translation + TTS")
 
     latest_file = get_latest_recording("guest_mic_recordings")
     if latest_file:
@@ -550,8 +561,8 @@ def button1_released():
             t0 = time.time()
             print(f"Transcribing ({source})...")
             model_to_use = WHISPER_MODEL_EN if source == "en" else WHISPER_MODEL
-            result = model_to_use.transcribe(latest_file, language=source)
-            recognized = result["text"].strip()
+            segments, _ = model_to_use.transcribe(latest_file, language=source)
+            recognized = " ".join(s.text for s in segments).strip()
             t1 = time.time()
             print("Recognized text:", recognized)
             print(f"[Time] STT took {t1 - t0:.2f} seconds")
@@ -602,7 +613,7 @@ def button2_pressed():
     if user_recorder.is_recording:
         return
 
-    print("Button2 pressed — start recording immediately")
+    print("Button2 pressed ΓÇö start recording immediately")
     user_button_confirmed = False
     user_record_start_time = time.time()
 
@@ -629,13 +640,13 @@ def button2_released():
 
     latest_file = get_latest_recording("user_mic_recordings")
     if duration < 1.0: # Have to hold button2 more than 1s
-        print("Button2 released too early — delete latest recording")
+        print("Button2 released too early ΓÇö delete latest recording")
         if latest_file and os.path.exists(latest_file):
             os.remove(latest_file)
         system_locked_by = None
         return
         
-    print("Button2 released after 1s — continue with STT + translation + TTS")
+    print("Button2 released after 1s ΓÇö continue with STT + translation + TTS")
 
     latest_file = get_latest_recording("user_mic_recordings")
     if latest_file:
@@ -648,8 +659,8 @@ def button2_released():
             t0 = time.time()
             print(f"Transcribing ({source})...")
             model_to_use = WHISPER_MODEL_EN if source == "en" else WHISPER_MODEL
-            result = model_to_use.transcribe(latest_file, language=source)
-            recognized = result["text"].strip()
+            segments, _ = model_to_use.transcribe(latest_file, language=source)
+            recognized = " ".join(s.text for s in segments).strip()
             t1 = time.time()
             print("Recognized text:", recognized)
             print(f"[Time] STT took {t1 - t0:.2f} seconds")
@@ -661,7 +672,7 @@ def button2_released():
             print(f"[Time] Translation took {t2 - t1:.2f} seconds")
 
             print("Speaking with Piper...")
-            speak_with_piper(translation, target, device="plughw:CARD=UACDemoV10,DEV=0") # new speaker's name
+            speak_with_piper(translation, target, device="plughw:CARD=UACDemoV10,DEV=0")
             t3 = time.time()
             print(f"[Time] TTS took {t3 - t2:.2f} seconds")
             print(f"[Total Time] {t3 - t0:.2f} seconds")
