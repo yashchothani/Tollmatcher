@@ -2,8 +2,6 @@
 
 Real-time bidirectional speech translation device running fully offline on Raspberry Pi. Designed for face-to-face conversations between two people speaking different languages.
 
----
-
 ## System Architecture
 
 ![Tollmatcher System Architecture](images/tollmatcher-architecture.png)
@@ -24,14 +22,18 @@ Real-time bidirectional speech translation device running fully offline on Raspb
 
 ## Hardware Requirements
 
-- Raspberry Pi (tested on Pi 5)
-- 4 GPIO buttons:
-  - **Button 1** (GPIO 27) — Guest microphone trigger
-  - **Button 2** (GPIO 22) — User microphone trigger
-  - **Button 3** (GPIO 20) — Source language selector
-  - **Button 4** (GPIO 21) — Target language selector
-- 2 USB microphones (guest: USB Microphone, user: EPOS PC 7 USB)
-- 2 audio output devices (configurable via environment variables)
+- **Platform:** Raspberry Pi 5
+- **Power:** Waveshare USB HAT with 2×3500 mAh batteries (e.g. 18650)
+- **Buttons** — The four GPIO buttons provide complete control over the device:
+
+| Button   | Label                    | GPIO | Function                                                      |
+| -------- | ------------------------ | ---- | ------------------------------------------------------------- |
+| Button 1 | **GT** (Guest Translate) | 27   | Guest speaks — record from guest mic, translate, play to user |
+| Button 2 | **UT** (User Translate)  | 22   | User speaks — record from user mic, translate, play to guest  |
+| Button 3 | **GL** (Guest Language)  | 20   | Cycle source language (guest's language)                      |
+| Button 4 | **UL** (User Language)   | 21   | Cycle target language (user's language)                       |
+
+- **Audio:** User = USB headset (EPOS PC 7 USB, mic + speaker). Guest = USB microphone + separate USB speaker. Devices configurable via environment variables.
 
 ---
 
@@ -56,7 +58,7 @@ This will:
 ### 2. Install translation models
 
 ```bash
-source ~/tollmachter-env/bin/activate
+source ~/tollmatcher-env/bin/activate
 
 # Install Argos Translate models (example for German-English)
 argospm install translate-en_de
@@ -122,28 +124,21 @@ The project includes two main translation scripts. The default systemd service u
 
 ## Usage
 
-### Button Controls
+**GT** (Guest Translate) / **UT** (User Translate): hold >1s to record, release to translate and play. **GL** (Guest Language) / **UL** (User Language): press to cycle languages (hear confirmation). See [Hardware Requirements](#hardware-requirements) for the full button table.
 
-| Button                  | Function                                          |
-| ----------------------- | ------------------------------------------------- |
-| **Button 1** (hold >1s) | Record guest speech → translate → play to user    |
-| **Button 2** (hold >1s) | Record user speech → translate → play to guest    |
-| **Button 3** (press)    | Cycle through source languages (guest's language) |
-| **Button 4** (press)    | Cycle through target languages (user's language)  |
+### Audio feedback
 
-### Audio Feedback
-
-- Language selection plays confirmation audio from `languages/` folder
-- Error conditions play `languages/error.wav`
-- Default startup plays `languages/default.wav`
+- Language selection: confirmation WAVs from `languages/` (e.g. `t_de.wav`, `zh_en.wav`)
+- Error (source = target): `languages/error.wav`
+- Startup: `languages/default.wav`
 
 ### Workflow
 
 1. Power on → service auto-starts
-2. Press **Button 4** to select user's language (plays confirmation)
-3. Press **Button 3** to select guest's language (plays confirmation)
-4. Guest holds **Button 1** and speaks → release after 1s → translation plays on user's speaker
-5. User holds **Button 2** and speaks → release after 1s → translation plays on guest's speaker
+2. Press **UL** (Button 4) until user's language is confirmed
+3. Press **GL** (Button 3) until guest's language is confirmed
+4. Guest: hold **GT** (Button 1), speak, release after 1s → translation on user's headset
+5. User: hold **UT** (Button 2), speak, release after 1s → translation on guest's speaker
 
 ---
 
@@ -243,7 +238,7 @@ arecord -L
 ### Missing translation models
 
 ```bash
-source ~/tollmachter-env/bin/activate
+source ~/tollmatcher-env/bin/activate
 argospm list  # Check installed models
 argospm install translate-<source>_<target>
 ```
@@ -271,7 +266,7 @@ Either use the start script (after editing paths inside it):
 Or run the main script directly:
 
 ```bash
-source ~/tollmachter-env/bin/activate
+source ~/tollmatcher-env/bin/activate
 cd ~/Tollmatcher/main
 python Main_Argos.py
 ```
