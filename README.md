@@ -4,7 +4,7 @@ Real-time bidirectional speech translation device running fully offline on Raspb
 
 ## System Architecture
 
-![Tollmatcher System Architecture](images/tollmatcher-architecture.png)
+![Tollmatcher System Architecture](assets/tollmatcher-architecture.png)
 
 ---
 
