@@ -1,0 +1,43 @@
+{
+  "dataset_name": "TollMatcher FLORES-200 Pilot Benchmark",
+  "version": "1.0.0",
+  "total_sentence_groups": 36,
+  "total_directional_evaluation_pairs": 216,
+  "languages": {
+    "en": "eng_Latn",
+    "de": "deu_Latn",
+    "fr": "fra_Latn"
+  },
+  "supported_directions": [
+    "EN->DE",
+    "DE->EN",
+    "EN->FR",
+    "FR->EN",
+    "DE->FR",
+    "FR->DE"
+  ],
+  "splits_distribution": {
+    "dev": 18,
+    "devtest": 18
+  },
+  "sentence_length_distribution": {
+    "short": 12,
+    "medium": 12,
+    "long": 12
+  },
+  "difficulty_distribution": {
+    "easy": 9,
+    "medium": 10,
+    "hard": 8,
+    "stress_test": 9
+  },
+  "domains_distribution": {
+    "wikinews": 20,
+    "wikivoyage": 16
+  },
+  "licensing": {
+    "license": "CC-BY-SA-4.0",
+    "attribution": "FLORES-200 / NLLB Team et al. (2022), arXiv:2207.04672",
+    "commercial_use_permitted": true
+  }
+}

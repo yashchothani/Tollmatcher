@@ -11,3 +11,7 @@ user_mic_recordings/*
 
 output/*
 !output/.gitkeep
+
+# Temporary speech / benchmark staging
+benchmark/audio/.tmp/
+

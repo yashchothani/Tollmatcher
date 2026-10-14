@@ -1,0 +1,109 @@
+variant,audio_id,target_lang,wer,cer,bleu,chrf,false_cuts_pause,f1_200ms,f1_500ms,ttfa_ms,ttl_ms,rtf,proc_time_sec
+Variant A (Fixed 1.0s Chunks),TM_A01,de,0.1111,0.0189,75.15,79.39,1,0.0,0.3333,950.0,600.3,0.385,2.0105
+Variant A (Fixed 1.0s Chunks),TM_A01,fr,0.1111,0.0189,83.38,87.64,1,0.0,0.3333,950.0,600.3,0.385,2.0105
+Variant A (Fixed 1.0s Chunks),TM_A02,en,0.125,0.0172,77.88,84.72,0,0.2857,0.2857,950.0,600.1,0.385,2.2369
+Variant A (Fixed 1.0s Chunks),TM_A02,fr,0.125,0.0172,83.38,87.64,0,0.2857,0.2857,950.0,600.1,0.385,2.2369
+Variant A (Fixed 1.0s Chunks),TM_A03,en,0.0769,0.0161,77.88,84.72,0,0.2857,0.2857,950.0,600.4,0.385,2.213
+Variant A (Fixed 1.0s Chunks),TM_A03,de,0.0769,0.0161,75.15,79.39,0,0.2857,0.2857,950.0,600.4,0.385,2.213
+Variant A (Fixed 1.0s Chunks),TM_A04,de,0.1667,0.0278,77.88,82.02,0,0.0,0.5,950.0,599.8,0.385,1.1685
+Variant A (Fixed 1.0s Chunks),TM_A04,fr,0.1667,0.0278,60.65,65.05,0,0.0,0.5,950.0,599.8,0.385,1.1685
+Variant A (Fixed 1.0s Chunks),TM_A05,en,0.1429,0.0213,67.03,70.92,0,0.4,0.4,950.0,599.8,0.385,1.4953
+Variant A (Fixed 1.0s Chunks),TM_A05,fr,0.1429,0.0213,60.65,65.05,0,0.4,0.4,950.0,599.8,0.385,1.4953
+Variant A (Fixed 1.0s Chunks),TM_A06,en,0.1429,0.0303,67.03,70.92,0,0.5,0.5,950.0,600.4,0.385,0.9898
+Variant A (Fixed 1.0s Chunks),TM_A06,de,0.1429,0.0303,77.88,82.02,0,0.5,0.5,950.0,600.4,0.385,0.9898
+Variant A (Fixed 1.0s Chunks),TM_A07,de,0.125,0.025,80.07,86.95,0,0.0,0.2857,950.0,599.6,0.385,2.1652
+Variant A (Fixed 1.0s Chunks),TM_A07,fr,0.125,0.025,81.87,87.65,0,0.0,0.2857,950.0,599.6,0.385,2.1652
+Variant A (Fixed 1.0s Chunks),TM_A08,en,0.1,0.0179,60.65,83.47,0,0.25,0.25,950.0,600.2,0.385,2.6661
+Variant A (Fixed 1.0s Chunks),TM_A08,fr,0.1,0.0179,81.87,87.65,0,0.25,0.25,950.0,600.2,0.385,2.6661
+Variant A (Fixed 1.0s Chunks),TM_A09,en,0.1,0.02,60.65,83.47,0,0.2857,0.2857,950.0,599.7,0.385,2.2276
+Variant A (Fixed 1.0s Chunks),TM_A09,de,0.1,0.02,80.07,86.95,0,0.2857,0.2857,950.0,599.7,0.385,2.2276
+Variant A (Fixed 1.0s Chunks),TM_A10,de,0.0833,0.0172,85.74,91.44,0,0.0,0.3333,950.0,599.9,0.385,1.9777
+Variant A (Fixed 1.0s Chunks),TM_A10,fr,0.0833,0.0172,89.48,92.26,0,0.0,0.3333,950.0,599.9,0.385,1.9777
+Variant A (Fixed 1.0s Chunks),TM_A11,en,0.0769,0.0116,83.38,91.29,0,0.0,0.25,950.0,600.4,0.385,2.5834
+Variant A (Fixed 1.0s Chunks),TM_A11,fr,0.0769,0.0116,89.48,92.26,0,0.0,0.25,950.0,600.4,0.385,2.5834
+Variant A (Fixed 1.0s Chunks),TM_A12,en,0.05,0.0102,83.38,91.29,1,0.25,0.25,950.0,599.7,0.385,2.7158
+Variant A (Fixed 1.0s Chunks),TM_A12,de,0.05,0.0102,85.74,91.44,1,0.25,0.25,950.0,599.7,0.385,2.7158
+Variant A (Fixed 1.0s Chunks),TM_A13,de,0.125,0.0385,77.88,88.2,0,0.0,0.5,950.0,599.5,0.385,1.1057
+Variant A (Fixed 1.0s Chunks),TM_A13,fr,0.125,0.0385,77.88,85.38,0,0.0,0.5,950.0,599.5,0.385,1.1057
+Variant A (Fixed 1.0s Chunks),TM_A14,en,0.125,0.027,77.88,83.29,0,0.4,0.4,950.0,599.6,0.385,1.4284
+Variant A (Fixed 1.0s Chunks),TM_A14,fr,0.125,0.027,77.88,85.38,0,0.4,0.4,950.0,599.6,0.385,1.4284
+Variant A (Fixed 1.0s Chunks),TM_A15,en,0.0909,0.0294,77.88,83.29,0,0.4,0.4,950.0,600.2,0.385,1.3833
+Variant A (Fixed 1.0s Chunks),TM_A15,de,0.0909,0.0294,77.88,88.2,0,0.4,0.4,950.0,600.2,0.385,1.3833
+Variant A (Fixed 1.0s Chunks),TM_A16,de,0.0,0.0,90.92,93.81,1,0.0,0.2857,950.0,599.6,0.385,2.4913
+Variant A (Fixed 1.0s Chunks),TM_A16,fr,0.0,0.0,92.6,88.36,1,0.0,0.2857,950.0,599.6,0.385,2.4913
+Variant A (Fixed 1.0s Chunks),TM_A17,en,0.0,0.0,88.9,92.67,1,0.2222,0.2222,950.0,599.6,0.385,3.0939
+Variant A (Fixed 1.0s Chunks),TM_A17,fr,0.0,0.0,92.6,88.36,1,0.2222,0.2222,950.0,599.6,0.385,3.0939
+Variant A (Fixed 1.0s Chunks),TM_A18,en,0.0455,0.0097,88.9,92.67,1,0.2222,0.2222,950.0,600.4,0.385,3.0835
+Variant A (Fixed 1.0s Chunks),TM_A18,de,0.0455,0.0097,90.92,93.81,1,0.2222,0.2222,950.0,600.4,0.385,3.0835
+Variant B (VAD Pause Endpointing),TM_A01,de,0.0,0.0,65.8,94.28,1,0.0,0.6667,2480.0,680.3,0.144,0.752
+Variant B (VAD Pause Endpointing),TM_A01,fr,0.0,0.0,78.25,95.25,1,0.0,0.6667,2480.0,680.3,0.144,0.752
+Variant B (VAD Pause Endpointing),TM_A02,en,0.0,0.0,70.17,94.14,1,0.0,0.6667,2880.0,680.1,0.144,0.8366
+Variant B (VAD Pause Endpointing),TM_A02,fr,0.0,0.0,78.25,95.25,1,0.0,0.6667,2880.0,680.1,0.144,0.8366
+Variant B (VAD Pause Endpointing),TM_A03,en,0.0,0.0,70.17,94.14,1,0.0,0.6667,2880.0,680.4,0.144,0.8277
+Variant B (VAD Pause Endpointing),TM_A03,de,0.0,0.0,65.8,94.28,1,0.0,0.6667,2880.0,680.4,0.144,0.8277
+Variant B (VAD Pause Endpointing),TM_A04,de,0.0,0.0,100.0,100.0,0,0.0,1.0,2914.8,679.8,0.144,0.437
+Variant B (VAD Pause Endpointing),TM_A04,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,2914.8,679.8,0.144,0.437
+Variant B (VAD Pause Endpointing),TM_A05,en,0.0,0.0,100.0,100.0,0,0.0,1.0,3763.8,679.8,0.144,0.5593
+Variant B (VAD Pause Endpointing),TM_A05,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,3763.8,679.8,0.144,0.5593
+Variant B (VAD Pause Endpointing),TM_A06,en,0.0,0.0,100.0,100.0,0,0.0,1.0,2451.4,680.4,0.144,0.3702
+Variant B (VAD Pause Endpointing),TM_A06,de,0.0,0.0,100.0,100.0,0,0.0,1.0,2451.4,680.4,0.144,0.3702
+Variant B (VAD Pause Endpointing),TM_A07,de,0.0,0.0,73.49,94.54,1,0.0,0.6667,1980.0,679.6,0.144,0.8099
+Variant B (VAD Pause Endpointing),TM_A07,fr,0.0,0.0,76.12,94.3,1,0.0,0.6667,1980.0,679.6,0.144,0.8099
+Variant B (VAD Pause Endpointing),TM_A08,en,0.0,0.0,76.12,93.35,1,0.0,0.6667,5180.0,680.2,0.144,0.9972
+Variant B (VAD Pause Endpointing),TM_A08,fr,0.0,0.0,76.12,94.3,1,0.0,0.6667,5180.0,680.2,0.144,0.9972
+Variant B (VAD Pause Endpointing),TM_A09,en,0.0,0.0,76.12,93.35,1,0.0,0.6667,1980.0,679.7,0.144,0.8332
+Variant B (VAD Pause Endpointing),TM_A09,de,0.0,0.0,73.49,94.54,1,0.0,0.6667,1980.0,679.7,0.144,0.8332
+Variant B (VAD Pause Endpointing),TM_A10,de,0.0,0.0,100.0,100.0,0,0.0,1.0,5016.9,679.9,0.144,0.7397
+Variant B (VAD Pause Endpointing),TM_A10,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,5016.9,679.9,0.144,0.7397
+Variant B (VAD Pause Endpointing),TM_A11,en,0.0,0.0,100.0,100.0,0,0.0,1.0,6590.4,680.4,0.144,0.9662
+Variant B (VAD Pause Endpointing),TM_A11,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,6590.4,680.4,0.144,0.9662
+Variant B (VAD Pause Endpointing),TM_A12,en,0.0,0.0,100.0,100.0,0,0.0,1.0,6933.7,679.7,0.144,1.0158
+Variant B (VAD Pause Endpointing),TM_A12,de,0.0,0.0,100.0,100.0,0,0.0,1.0,6933.7,679.7,0.144,1.0158
+Variant B (VAD Pause Endpointing),TM_A13,de,0.0,0.0,100.0,100.0,0,0.0,1.0,2751.5,679.5,0.144,0.4136
+Variant B (VAD Pause Endpointing),TM_A13,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,2751.5,679.5,0.144,0.4136
+Variant B (VAD Pause Endpointing),TM_A14,en,0.0,0.0,100.0,100.0,0,0.0,1.0,3589.6,679.6,0.144,0.5342
+Variant B (VAD Pause Endpointing),TM_A14,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,3589.6,679.6,0.144,0.5342
+Variant B (VAD Pause Endpointing),TM_A15,en,0.0,0.0,100.0,100.0,0,0.0,1.0,3473.2,680.2,0.144,0.5174
+Variant B (VAD Pause Endpointing),TM_A15,de,0.0,0.0,100.0,100.0,0,0.0,1.0,3473.2,680.2,0.144,0.5174
+Variant B (VAD Pause Endpointing),TM_A16,de,0.0,0.0,88.44,96.77,1,0.0,0.6667,3480.0,679.6,0.144,0.9318
+Variant B (VAD Pause Endpointing),TM_A16,fr,0.0,0.0,90.62,91.43,1,0.0,0.6667,3480.0,679.6,0.144,0.9318
+Variant B (VAD Pause Endpointing),TM_A17,en,0.0,0.0,85.79,96.18,1,0.0,0.6667,4580.0,679.6,0.144,1.1572
+Variant B (VAD Pause Endpointing),TM_A17,fr,0.0,0.0,90.62,91.43,1,0.0,0.6667,4580.0,679.6,0.144,1.1572
+Variant B (VAD Pause Endpointing),TM_A18,en,0.0,0.0,85.79,96.18,1,0.0,0.6667,4580.0,680.4,0.144,1.1533
+Variant B (VAD Pause Endpointing),TM_A18,de,0.0,0.0,88.44,96.77,1,0.0,0.6667,4580.0,680.4,0.144,1.1533
+Variant C (Streaming Adaptive),TM_A01,de,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.3,0.108,0.564
+Variant C (Streaming Adaptive),TM_A01,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.3,0.108,0.564
+Variant C (Streaming Adaptive),TM_A02,en,0.0,0.0,100.0,100.0,0,0.0,0.6667,360.0,640.1,0.108,0.6275
+Variant C (Streaming Adaptive),TM_A02,fr,0.0,0.0,100.0,100.0,0,0.0,0.6667,360.0,640.1,0.108,0.6275
+Variant C (Streaming Adaptive),TM_A03,en,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.4,0.108,0.6208
+Variant C (Streaming Adaptive),TM_A03,de,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.4,0.108,0.6208
+Variant C (Streaming Adaptive),TM_A04,de,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.8,0.108,0.3278
+Variant C (Streaming Adaptive),TM_A04,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.8,0.108,0.3278
+Variant C (Streaming Adaptive),TM_A05,en,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.8,0.108,0.4195
+Variant C (Streaming Adaptive),TM_A05,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.8,0.108,0.4195
+Variant C (Streaming Adaptive),TM_A06,en,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.4,0.108,0.2777
+Variant C (Streaming Adaptive),TM_A06,de,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.4,0.108,0.2777
+Variant C (Streaming Adaptive),TM_A07,de,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.6,0.108,0.6074
+Variant C (Streaming Adaptive),TM_A07,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.6,0.108,0.6074
+Variant C (Streaming Adaptive),TM_A08,en,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.2,0.108,0.7479
+Variant C (Streaming Adaptive),TM_A08,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.2,0.108,0.7479
+Variant C (Streaming Adaptive),TM_A09,en,0.0,0.0,100.0,100.0,0,0.0,0.6667,360.0,639.7,0.108,0.6249
+Variant C (Streaming Adaptive),TM_A09,de,0.0,0.0,100.0,100.0,0,0.0,0.6667,360.0,639.7,0.108,0.6249
+Variant C (Streaming Adaptive),TM_A10,de,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.9,0.108,0.5548
+Variant C (Streaming Adaptive),TM_A10,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.9,0.108,0.5548
+Variant C (Streaming Adaptive),TM_A11,en,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.4,0.108,0.7247
+Variant C (Streaming Adaptive),TM_A11,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.4,0.108,0.7247
+Variant C (Streaming Adaptive),TM_A12,en,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.7,0.108,0.7618
+Variant C (Streaming Adaptive),TM_A12,de,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.7,0.108,0.7618
+Variant C (Streaming Adaptive),TM_A13,de,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.5,0.108,0.3102
+Variant C (Streaming Adaptive),TM_A13,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.5,0.108,0.3102
+Variant C (Streaming Adaptive),TM_A14,en,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.6,0.108,0.4007
+Variant C (Streaming Adaptive),TM_A14,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.6,0.108,0.4007
+Variant C (Streaming Adaptive),TM_A15,en,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.2,0.108,0.388
+Variant C (Streaming Adaptive),TM_A15,de,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.2,0.108,0.388
+Variant C (Streaming Adaptive),TM_A16,de,0.0,0.0,100.0,100.0,0,0.0,0.6667,360.0,639.6,0.108,0.6989
+Variant C (Streaming Adaptive),TM_A16,fr,0.0,0.0,100.0,100.0,0,0.0,0.6667,360.0,639.6,0.108,0.6989
+Variant C (Streaming Adaptive),TM_A17,en,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.6,0.108,0.8679
+Variant C (Streaming Adaptive),TM_A17,fr,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,639.6,0.108,0.8679
+Variant C (Streaming Adaptive),TM_A18,en,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.4,0.108,0.865
+Variant C (Streaming Adaptive),TM_A18,de,0.0,0.0,100.0,100.0,0,0.0,1.0,360.0,640.4,0.108,0.865

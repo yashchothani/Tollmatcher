@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TollMatcherBenchmarkSchema",
+  "description": "Comprehensive schema for TollMatcher multilingual speech translation benchmark, supporting text parallel groups (Component A) and speech streaming examples (Components B & C).",
+  "oneOf": [
+    { "$ref": "#/$defs/aligned_text_group" },
+    { "$ref": "#/$defs/speech_example" }
+  ],
+  "$defs": {
+    "aligned_text_group": {
+      "type": "object",
+      "required": [
+        "record_type",
+        "sentence_group_id",
+        "source_dataset",
+        "original_source_id",
+        "original_split",
+        "text_en",
+        "text_de",
+        "text_fr",
+        "language_codes",
+        "sentence_length_category",
+        "linguistic_difficulty_category",
+        "translation_verification_status",
+        "license_or_provenance_reference"
+      ],
+      "properties": {
+        "record_type": { "type": "string", "const": "aligned_text_group" },
+        "sentence_group_id": { "type": "string", "pattern": "^TM_G[0-9]{2,4}$" },
+        "source_dataset": { "type": "string", "enum": ["FLORES-200", "FLORES+", "TollMatcher_Original_Authored"] },
+        "original_source_id": { "type": "string" },
+        "original_split": { "type": "string", "enum": ["dev", "devtest", "test"] },
+        "text_en": { "type": "string", "minLength": 1 },
+        "text_de": { "type": "string", "minLength": 1 },
+        "text_fr": { "type": "string", "minLength": 1 },
+        "language_codes": {
+          "type": "object",
+          "required": ["en", "de", "fr"],
+          "properties": {
+            "en": { "type": "string", "const": "eng_Latn" },
+            "de": { "type": "string", "const": "deu_Latn" },
+            "fr": { "type": "string", "const": "fra_Latn" }
+          }
+        },
+        "supported_directions": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["EN->DE", "DE->EN", "EN->FR", "FR->EN", "DE->FR", "FR->DE"] },
+          "minItems": 6,
+          "maxItems": 6,
+          "uniqueItems": true
+        },
+        "topic": { "type": ["string", "null"] },
+        "domain": { "type": ["string", "null"] },
+        "url": { "type": ["string", "null"] },
+        "sentence_length_category": { "type": "string", "enum": ["short", "medium", "long"] },
+        "linguistic_difficulty_category": { "type": "string", "enum": ["easy", "medium", "hard", "stress_test"] },
+        "translation_verification_status": {
+          "type": "string",
+          "enum": ["official_flores200_verified", "human_expert_verified", "pending_review"]
+        },
+        "license_or_provenance_reference": { "type": "string", "enum": ["CC-BY-SA-4.0", "CC-BY-4.0", "CC0-1.0"] },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "speech_example": {
+      "type": "object",
+      "required": [
+        "record_type",
+        "audio_example_id",
+        "transcript",
+        "transcript_language",
+        "sample_rate_hz",
+        "channel_count",
+        "recording_source",
+        "audio_license_or_permission",
+        "annotation_status"
+      ],
+      "properties": {
+        "record_type": { "type": "string", "const": "speech_example" },
+        "audio_example_id": { "type": "string", "pattern": "^TM_A[0-9]{2,4}$" },
+        "speaker_id": { "type": ["string", "null"] },
+        "audio_file_path": { "type": ["string", "null"] },
+        "transcript": { "type": "string", "minLength": 1 },
+        "transcript_language": { "type": "string", "enum": ["en", "de", "fr"] },
+        "sample_rate_hz": { "type": "integer", "const": 16000 },
+        "channel_count": { "type": "integer", "const": 1 },
+        "duration_seconds": { "type": ["number", "null"] },
+        "speech_start_time": { "type": ["number", "null"] },
+        "speech_end_time": { "type": ["number", "null"] },
+        "internal_pause_annotations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["pause_start_sec", "pause_end_sec", "duration_sec", "pause_type"],
+            "properties": {
+              "pause_start_sec": { "type": "number" },
+              "pause_end_sec": { "type": "number" },
+              "duration_sec": { "type": "number" },
+              "pause_type": { "type": "string", "enum": ["thinking_pause", "breath", "hesitation_filler", "false_start"] }
+            }
+          }
+        },
+        "reference_translation_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "recording_source": {
+          "type": "string",
+          "enum": ["common_voice_v17", "tollmatcher_human_recorded", "synthetic_tts_control"]
+        },
+        "audio_license_or_permission": { "type": "string", "enum": ["CC0-1.0", "CC-BY-4.0"] },
+        "annotation_status": {
+          "type": "string",
+          "enum": ["unrecorded", "pending_annotation", "praat_timestamped_verified"]
+        }
+      }
+    }
+  }
+}
