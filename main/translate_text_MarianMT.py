@@ -12,9 +12,9 @@ language_codes = ['en', 'de', 'zh']
 
 # Audio confirmation files 
 audio_map = {
-    'en': os.path.join(os.path.dirname(__file__), '../languages/en.wav'),
-    'de': os.path.join(os.path.dirname(__file__), '../languages/de.wav'),
-    'zh': os.path.join(os.path.dirname(__file__), '../languages/zh.wav')
+    'en': os.path.join(os.path.dirname(__file__), '../languages/en_user.wav'),
+    'de': os.path.join(os.path.dirname(__file__), '../languages/de_user.wav'),
+    'zh': os.path.join(os.path.dirname(__file__), '../languages/zh_user.wav')
 }
 
 source_button = Button(SOURCE_BUTTON_PIN)

@@ -8,16 +8,54 @@ Local Agreement streaming ASR stabilization algorithm:
 - Retains uncommitted suffix words in active hypothesis buffer
 """
 
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Optional
+import re
 
 
 class LocalAgreementStabilizer:
     """Stabilizes streaming incremental ASR hypotheses via k-agreement."""
 
-    def __init__(self, k_agreement: int = 2):
-        self.k_agreement = k_agreement
+    def __init__(self, k_agreement: int = 2, normalize_punctuation: bool = True):
+        self.k_agreement = max(1, k_agreement)
+        self.normalize_punctuation = normalize_punctuation
         self.history: List[List[str]] = []
         self.committed_words: List[str] = []
+
+    @property
+    def committed_text(self) -> str:
+        return " ".join(self.committed_words)
+
+    @property
+    def uncommitted_count(self) -> int:
+        latest = self.history[-1] if self.history else []
+        return max(0, len(latest) - len(self.committed_words))
+
+    def is_stable(self, threshold_k: Optional[int] = None) -> bool:
+        """
+        Returns True if the stabilizer has accumulated at least k hypotheses
+        and the latest hypothesis uncommitted buffer is empty or stabilized.
+        """
+        req_k = threshold_k if threshold_k is not None else self.k_agreement
+        if len(self.history) < req_k:
+            return False
+        # If all words in latest hypothesis are committed, it's 100% stable
+        latest = self.history[-1] if self.history else []
+        if len(latest) == len(self.committed_words):
+            return True
+        # If the last two hypotheses are identical in uncommitted words
+        if len(self.history) >= 2 and self.history[-1] == self.history[-2]:
+            return True
+        return False
+
+    def _strip_punct(self, word: str) -> str:
+        return re.sub(r"^[^\w\s]+|[^\w\s]+$", "", word).lower()
+
+    def _words_match(self, w1: str, w2: str) -> bool:
+        if w1 == w2:
+            return True
+        if self.normalize_punctuation:
+            return self._strip_punct(w1) == self._strip_punct(w2)
+        return False
 
     def _longest_common_prefix(self, seqs: List[List[str]]) -> List[str]:
         if not seqs:
@@ -26,8 +64,9 @@ class LocalAgreementStabilizer:
         min_len = min(len(s) for s in seqs)
         for i in range(min_len):
             first = seqs[0][i]
-            if all(s[i] == first for s in seqs):
-                prefix.append(first)
+            if all(self._words_match(s[i], first) for s in seqs):
+                # Prefer the most recent capitalization/punctuation
+                prefix.append(seqs[-1][i])
             else:
                 break
         return prefix
@@ -60,7 +99,8 @@ class LocalAgreementStabilizer:
             "newly_committed": newly_committed,
             "all_committed_text": " ".join(self.committed_words),
             "uncommitted_text": " ".join(uncommitted_words),
-            "latest_hypothesis": " ".join(latest_words)
+            "latest_hypothesis": " ".join(latest_words),
+            "is_stable": self.is_stable()
         }
 
     def flush(self) -> str:
@@ -75,3 +115,8 @@ class LocalAgreementStabilizer:
         self.history.clear()
         self.committed_words.clear()
         return result
+
+
+# Alias for backward compatibility
+LocalAgreementMatcher = LocalAgreementStabilizer
+

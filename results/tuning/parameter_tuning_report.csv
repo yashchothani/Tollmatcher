@@ -1,0 +1,11 @@
+config_name,k_agreement,decode_interval_sec,short_endpoint_sec,safe_endpoint_sec,max_pause_bridge_sec,total_false_cuts_in_pause,ttfa_ms_median,ttl_ms_median,ttl_ms_p95,avg_chrf,avg_bleu,avg_wer,avg_rtf,is_pareto_optimal
+Fast Response (Low Latency),1,0.4,0.3,0.6,0.85,2,660.0,640.05,640.4,99.88,99.42,0.0,0.1201,True
+Balanced Streaming (Recommended),2,0.7,0.4,0.75,1.0,0,1660.0,640.05,640.4,100.0,100.0,0.0,0.108,False
+High Precision (Stable),3,0.7,0.5,0.85,1.1,0,2360.0,640.25,740.0,100.0,100.0,0.003,0.108,False
+Raspberry Pi 5 Constrained,2,0.8,0.45,0.75,1.0,0,1960.0,640.25,690.0,100.0,100.0,0.0204,0.106,True
+Sweep-k=1,1,0.7,0.4,0.75,1.0,0,960.0,640.05,640.4,100.0,100.0,0.0,0.108,True
+Sweep-k=3,3,0.7,0.4,0.75,1.0,0,2360.0,640.05,640.4,100.0,100.0,0.0,0.108,False
+Sweep-Bridge=500ms,2,0.7,0.4,0.75,0.5,6,1660.0,640.05,640.4,99.46,97.14,0.0,0.108,False
+Sweep-Bridge=700ms,2,0.7,0.4,0.75,0.7,0,1660.0,640.05,640.4,100.0,100.0,0.0,0.108,False
+Sweep-Bridge=850ms,2,0.7,0.4,0.75,0.85,0,1660.0,640.05,640.4,100.0,100.0,0.0,0.108,False
+Sweep-Bridge=1200ms,2,0.7,0.4,0.75,1.2,0,1660.0,640.05,640.4,100.0,100.0,0.0,0.108,False

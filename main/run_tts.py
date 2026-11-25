@@ -2,8 +2,15 @@ import subprocess
 import time
 import os
 
-PIPER_PATH = "/home/tollmatcher2/offline_translator/piper_rebuild/piper/piper"
+WORKSPACE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PIPER_DIR = "/home/tollmatcher2/offline_translator/piper_rebuild/piper"
+if not os.path.isdir(PIPER_DIR):
+    PIPER_DIR = os.path.join(WORKSPACE_ROOT, "piper_rebuild", "piper")
+
+PIPER_PATH = os.path.join(PIPER_DIR, "piper")
 OUTPUT_DIR = "/home/tollmatcher2/offline_translator/output"
+if not os.path.isdir(OUTPUT_DIR):
+    OUTPUT_DIR = os.path.join(WORKSPACE_ROOT, "output")
 
 VOICE_MODELS = {
     "en": {
@@ -67,8 +74,8 @@ def main():
 
     command = [
         PIPER_PATH,
-        "--model", f"/home/tollmatcher2/offline_translator/piper_rebuild/piper/{voice['model']}",
-        "--config", f"/home/tollmatcher2/offline_translator/piper_rebuild/piper/{voice['config']}",
+        "--model", os.path.join(PIPER_DIR, voice["model"]),
+        "--config", os.path.join(PIPER_DIR, voice["config"]),
         "--output_file", output_file,
     ]
 

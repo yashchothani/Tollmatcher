@@ -88,3 +88,8 @@ def compute_cer(reference: str, hypothesis: str) -> float:
 
     dist, _, _, _ = levenshtein_distance(ref_chars, hyp_chars)
     return round(dist / len(ref_chars), 4)
+
+
+# Backward-compatible alias
+normalize_asr_text = normalize_text
+

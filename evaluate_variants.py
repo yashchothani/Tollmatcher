@@ -9,7 +9,7 @@ Executes the full evaluation matrix comparing:
 - Variant C: VAD + Local Agreement (k=2) + adaptive endpointing
 
 Evaluates:
-- ASR quality (WER, CER)
+- ASR quality (WER, CER) 
 - Translation fidelity (SacreBLEU, chrF++)
 - Segmentation accuracy (F1 at tau=200ms and 500ms, False Cut Rate in thinking pauses)
 - Latency (Time-to-First-Audio, Total Turnaround Latency, P95 tail latency)
@@ -35,11 +35,18 @@ from src.runners.variant_c import VariantCRunner
 from src.reporting.aggregate import aggregate_variant_results
 from src.reporting.report_generator import generate_benchmark_reports
 from src.metrics.runtime import get_hardware_info, get_peak_memory_mb
+from src.tuning.parameter_space import (
+    StreamingHyperparameters,
+    PRESETS,
+    get_preset,
+    get_curated_grid
+)
+from src.tuning.grid_search import StreamingParameterTuner
 
 
 import argparse
 
-def run_benchmark(selected_variants=None):
+def run_benchmark(selected_variants=None, custom_c_params=None):
     print("=" * 80)
     print("TOLLMATCHER MULTILINGUAL STREAMING SPEECH TRANSLATION BENCHMARK")
     print("=" * 80)
@@ -58,10 +65,21 @@ def run_benchmark(selected_variants=None):
     print(f"Loaded {len(pilot_groups)} FLORES-200 aligned text groups.")
     print(f"Loaded {len(speech_records)} timestamped speech recordings.")
 
+    c_kwargs = {
+        "k_agreement": 2,
+        "base_silence_sec": 0.400,
+        "max_pause_bridge_sec": 1.000,
+        "decode_interval_sec": 0.700,
+        "safe_endpoint_sec": 0.750,
+        "forced_endpoint_sec": 6.000
+    }
+    if custom_c_params:
+        c_kwargs.update({k: v for k, v in custom_c_params.items() if v is not None})
+
     available_runners = {
         "A": VariantARunner(chunk_sec=1.0),
         "B": VariantBRunner(endpoint_silence_sec=0.600),
-        "C": VariantCRunner(k_agreement=2, base_silence_sec=0.400, max_pause_bridge_sec=1.000)
+        "C": VariantCRunner(**c_kwargs)
     }
 
     if not selected_variants:
@@ -160,8 +178,27 @@ if __name__ == "__main__":
                         help="Run only Proposed Algorithm (Variant C)")
     parser.add_argument("--previous", action="store_true",
                         help="Run only Previous Algorithm from Summersemester 2026 (Variant B)")
+    parser.add_argument("--tune", action="store_true",
+                        help="Run full parameter tuning sweep over Variant C")
+    parser.add_argument("--k", type=int, default=None, help="Local Agreement depth k for Variant C")
+    parser.add_argument("--decode-interval", type=float, default=None, help="ASR decode interval (sec) for Variant C")
+    parser.add_argument("--short-endpoint", type=float, default=None, help="Short silence endpoint (sec) for Variant C")
+    parser.add_argument("--safe-endpoint", type=float, default=None, help="Safe silence endpoint (sec) for Variant C")
+    parser.add_argument("--pause-bridge", type=float, default=None, help="Max pause bridge (sec) for Variant C")
+    parser.add_argument("--forced-endpoint", type=float, default=None, help="Forced duration cap (sec) for Variant C")
 
     args = parser.parse_args()
+
+    if args.tune:
+        from tune_streaming_params import print_tuning_table
+        tuner = StreamingParameterTuner()
+        configs = get_curated_grid()
+        print(f"Executing parameter tuning sweep across {len(configs)} configurations...")
+        summaries = tuner.evaluate_grid(configs)
+        print_tuning_table(summaries)
+        report_paths = tuner.export_reports(summaries)
+        print(f"Tuning reports saved in: {report_paths['md_path']}")
+        sys.exit(0)
 
     selected = None
     if args.proposed:
@@ -173,4 +210,13 @@ if __name__ == "__main__":
     elif args.variants:
         selected = [v.upper() for v in args.variants]
 
-    run_benchmark(selected)
+    custom_params = {
+        "k_agreement": args.k,
+        "decode_interval_sec": args.decode_interval,
+        "short_endpoint_sec": args.short_endpoint,
+        "safe_endpoint_sec": args.safe_endpoint,
+        "max_pause_bridge_sec": args.pause_bridge,
+        "forced_endpoint_sec": args.forced_endpoint
+    }
+
+    run_benchmark(selected, custom_c_params=custom_params)

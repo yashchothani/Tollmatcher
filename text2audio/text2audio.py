@@ -22,9 +22,10 @@ if __name__ == "__main__":
       language = 'de'  # 'en' for English, 'de' for German, etc.
       output = gTTS(text=myText, lang=language, slow=False)
       
-      output.save("speech.mp3")
-   #    *****Change the path of the mp3 file location*****
-      playsound('D:/GitHub/Tollmatcher/text2audio/speech.mp3')
-      os.remove("speech.mp3")
+      mp3_path = os.path.join(os.path.dirname(__file__), "speech.mp3")
+      output.save(mp3_path)
+      playsound(mp3_path)
+      if os.path.exists(mp3_path):
+          os.remove(mp3_path)
       #speech(myText, output)
 

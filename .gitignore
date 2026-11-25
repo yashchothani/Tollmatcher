@@ -1,6 +1,7 @@
 .DS_Store
 tollmatcher-env/
 tollmatcher-venv/
+.venv/
 __pycache__/
 
 guest_mic_recordings/*
@@ -14,4 +15,10 @@ output/*
 
 # Temporary speech / benchmark staging
 benchmark/audio/.tmp/
+
+# Large deployment archives and tarballs (must not exceed GitHub 100MB limit)
+*.tar.gz
+*.zip
+*.log
+
 

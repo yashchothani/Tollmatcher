@@ -13,13 +13,13 @@ language_codes = ['en', 'de', 'zh', 'ar', 'es', 'fr', 'uk']
 
 # Audio confirmation files 
 audio_map = {
-    'en': os.path.join(os.path.dirname(__file__), '../languages/en.wav'),
-    'de': os.path.join(os.path.dirname(__file__), '../languages/de.wav'),
-    'zh': os.path.join(os.path.dirname(__file__), '../languages/zh.wav'),
-    'ar': os.path.join(os.path.dirname(__file__), '../languages/de.wav'), # need change, now for testing
-    'es': os.path.join(os.path.dirname(__file__), '../languages/zh.wav'),
-    'fr': os.path.join(os.path.dirname(__file__), '../languages/de.wav'),
-    'uk': os.path.join(os.path.dirname(__file__), '../languages/zh.wav')
+    'en': os.path.join(os.path.dirname(__file__), '../languages/en_user.wav'),
+    'de': os.path.join(os.path.dirname(__file__), '../languages/de_user.wav'),
+    'zh': os.path.join(os.path.dirname(__file__), '../languages/zh_user.wav'),
+    'ar': os.path.join(os.path.dirname(__file__), '../languages/ar_user.wav'),
+    'es': os.path.join(os.path.dirname(__file__), '../languages/es_user.wav'),
+    'fr': os.path.join(os.path.dirname(__file__), '../languages/fr_user.wav'),
+    'uk': os.path.join(os.path.dirname(__file__), '../languages/uk_user.wav')
 }
 
 # Setup buttons

@@ -1,0 +1,10 @@
+# Lightweight Raspberry Pi 5 Edge Runtime Dependencies
+# Excludes heavy dev/benchmark libraries (librosa, scipy, reportlab, matplotlib, pandas, sacrebleu)
+
+faster-whisper>=1.0.0
+argostranslate>=1.9.0
+numpy>=1.24.0
+pyaudio>=0.2.13
+sounddevice>=0.4.6
+gpiozero>=2.0
+requests>=2.28.0

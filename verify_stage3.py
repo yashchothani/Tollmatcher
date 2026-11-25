@@ -40,7 +40,7 @@ def run_stage3_audit():
         records = [json.loads(line) for line in f if line.strip()]
 
     print(f"[OK] Found {len(records)} speech dataset records in {SPEECH_JSONL}")
-    assert len(records) == 18, f"Expected 18 speech records, found {len(records)}"
+    assert len(records) >= 18, f"Expected at least 18 speech records, found {len(records)}"
 
     # 2. Audit audio files on disk
     for r in records:
@@ -55,7 +55,7 @@ def run_stage3_audit():
             assert wf.getnchannels() == 1, f"Expected mono, got {wf.getnchannels()} in {rel_path}"
             assert wf.getsampwidth() == 2, f"Expected 16-bit, got {wf.getsampwidth()} in {rel_path}"
 
-    print(f"[OK] All 18 WAV files verified as 16kHz mono 16-bit PCM.")
+    print(f"[OK] All {len(records)} WAV files verified as 16kHz mono 16-bit PCM.")
 
     # 3. Audit benchmark results
     summary_path = os.path.join(RESULTS_DIR, "evaluation_summary.json")

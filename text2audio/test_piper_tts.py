@@ -2,8 +2,13 @@ import subprocess
 import os
 import simpleaudio as sa
 
-model_path = "/home/tollmatcher2/offline_translator/text2audio/piper/en_US-kristin-medium.onnx"
-config_path = "/home/tollmatcher2/offline_translator/text2audio/piper/en_US-kristin-medium.onnx.json"
+base_dir = "/home/tollmatcher2/offline_translator/text2audio/piper"
+if not os.path.isdir(base_dir):
+    base_dir = os.path.join(os.path.dirname(__file__), "piper")
+
+model_path = os.path.join(base_dir, "en_US-kristin-medium.onnx")
+config_path = os.path.join(base_dir, "en_US-kristin-medium.onnx.json")
+piper_bin = os.path.join(base_dir, "piper", "piper")
 output_path = "speech.wav"
 
 while True:
@@ -12,7 +17,7 @@ while True:
         break
 
     result = subprocess.run([
-        "/home/tollmatcher2/offline_translator/text2audio/piper/piper/piper",        
+        piper_bin,        
         "--model", model_path,
         "--config", config_path,
         "--output_file", output_path,

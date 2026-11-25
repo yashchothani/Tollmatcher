@@ -104,6 +104,59 @@ SPEECH_SPECS = [
     ("TM_A18", "fr", "Thomas", "TM_G25", [
         ("Nous avons à présent des souris de quatre mois qui ne sont pas diabétiques,", 0.75, "thinking_pause"),
         ("alors qu'elles l'étaient auparavant, a-t-il ajouté.", 0.0, None)
+    ]),
+
+    # TM_A19 to TM_A21: Airport incident / emergency response
+    ("TM_A19", "en", "Samantha", "TM_G02", [
+        ("Local media reports an airport fire vehicle", 0.60, "thinking_pause"),
+        ("rolled over while responding.", 0.0, None)
+    ]),
+    ("TM_A20", "de", "Anna", "TM_G02", [
+        ("Lokale Medien berichten, dass ein Feuerwehrwagen", 0.60, "thinking_pause"),
+        ("während der Rettungsaktion umkippte.", 0.0, None)
+    ]),
+    ("TM_A21", "fr", "Thomas", "TM_G02", [
+        ("La presse locale a rapporté qu'un véhicule de pompiers", 0.60, "thinking_pause"),
+        ("a fait des tonneaux en portant secours.", 0.0, None)
+    ]),
+
+    # TM_A22 to TM_A24: Corporate technology acquisition (Short)
+    ("TM_A22", "en", "Samantha", "TM_G05", [
+        ("It is the biggest acquisition in eBay's history.", 0.0, None)
+    ]),
+    ("TM_A23", "de", "Anna", "TM_G05", [
+        ("Es ist die größte Übernahme in der Geschichte von eBay.", 0.0, None)
+    ]),
+    ("TM_A24", "fr", "Thomas", "TM_G05", [
+        ("C’est la plus grande acquisition de l’histoire d’eBay.", 0.0, None)
+    ]),
+
+    # TM_A25 to TM_A27: Public governance / legislation urgency
+    ("TM_A25", "en", "Samantha", "TM_G07", [
+        ("The Irish government is stressing the urgency of parliamentary legislation", 0.50, "breath"),
+        ("to rectify the situation.", 0.0, None)
+    ]),
+    ("TM_A26", "de", "Anna", "TM_G07", [
+        ("Die irische Regierung betont die Dringlichkeit einer parlamentarischen Gesetzgebung,", 0.50, "breath"),
+        ("um die Situation zu bereinigen.", 0.0, None)
+    ]),
+    ("TM_A27", "fr", "Thomas", "TM_G07", [
+        ("Le gouvernement irlandais souligne l'urgence d'une législation parlementaire", 0.50, "breath"),
+        ("pour rectifier la situation.", 0.0, None)
+    ]),
+
+    # TM_A28 to TM_A30: Travel and tourism register
+    ("TM_A28", "en", "Samantha", "TM_G10", [
+        ("Traveling to Walt Disney World represents a major pilgrimage", 0.65, "thinking_pause"),
+        ("for many American families.", 0.0, None)
+    ]),
+    ("TM_A29", "de", "Anna", "TM_G10", [
+        ("Eine Reise nach Walt Disney World stellt für viele amerikanische Familien", 0.65, "thinking_pause"),
+        ("eine große Wallfahrt dar.", 0.0, None)
+    ]),
+    ("TM_A30", "fr", "Thomas", "TM_G10", [
+        ("Le voyage à Walt Disney World représente un pèlerinage important", 0.65, "thinking_pause"),
+        ("pour de nombreuses familles américaines.", 0.0, None)
     ])
 ]
 

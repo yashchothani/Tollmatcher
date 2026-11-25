@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TollMatcher — Speech Translation Lab</title>
+  <meta name="description" content="Offline low-latency speech recognition and multilingual translation testing interface for TollMatcher.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="logo-mark">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="22"></line>
+            <line x1="8" y1="22" x2="16" y2="22"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="app-title">TollMatcher <span class="title-sub">Speech Translation Lab</span></h1>
+          <p class="app-desc">Edge-optimized offline multilingual translation pipeline (EN ↔ DE ↔ FR)</p>
+        </div>
+      </div>
+
+      <div class="header-meta">
+        <div class="status-pill" id="backendStatusPill" title="Backend connection status">
+          <span class="status-dot pulsing" id="statusDot"></span>
+          <span id="backendStatusText">Connecting...</span>
+        </div>
+        <div class="mode-badge" id="inferenceModeBadge">
+          <span class="mode-icon">⚡</span>
+          <span id="inferenceModeText">Offline Local Pipeline</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="nav-tab active" id="tabLiveBtn" role="tab" aria-selected="true" onclick="switchTab('live')">
+        <span class="tab-icon">🎙️</span> Live Speech Translation
+      </button>
+      <button class="nav-tab" id="tabDatasetBtn" role="tab" aria-selected="false" onclick="switchTab('dataset')">
+        <span class="tab-icon">📊</span> Dataset Benchmark & Evaluation
+      </button>
+    </nav>
+
+    <!-- Tab 1: Live Speech Translation -->
+    <main class="tab-content active" id="tabLiveContent">
+      <div class="lab-grid">
+        <!-- Left Panel: Recording & Input Controls -->
+        <section class="panel input-panel" aria-labelledby="inputHeading">
+          <div class="panel-header">
+            <h2 id="inputHeading" class="panel-title">Audio Input & Capture</h2>
+            <button class="btn btn-subtle" id="resetAllBtn" onclick="resetAll()" title="Reset all fields">Reset</button>
+          </div>
+
+          <!-- Mic Denied Alert -->
+          <div class="alert alert-error" id="micAlert" style="display: none;">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-content">
+              <strong>Microphone Access Denied:</strong>
+              <span id="micAlertMsg">Please enable microphone permissions in your browser address bar and reload.</span>
+            </div>
+          </div>
+
+          <!-- Configuration Controls -->
+          <div class="control-row">
+            <div class="control-group flex-1">
+              <label for="sourceLanguageSelect" class="control-label">Source Language</label>
+              <select id="sourceLanguageSelect" class="form-select">
+                <option value="auto" selected>✨ Auto-Detect (Whisper)</option>
+                <option value="en">🇬🇧 English (EN)</option>
+                <option value="de">🇩🇪 German (DE)</option>
+                <option value="fr">🇫🇷 French (FR)</option>
+              </select>
+            </div>
+
+            <div class="control-group flex-1">
+              <label for="micSelect" class="control-label">Microphone Device</label>
+              <select id="micSelect" class="form-select">
+                <option value="default">Default Input Device</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Recording Center Widget -->
+          <div class="mic-stage">
+            <div class="mic-visualizer-wrap">
+              <div class="pulse-ring" id="pulseRing"></div>
+              <button class="btn-mic" id="micBtn" onclick="toggleRecording()" aria-label="Toggle Microphone Recording" title="Click to Start Recording">
+                <svg class="mic-icon" id="micSvg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="22"></line>
+                  <line x1="8" y1="22" x2="16" y2="22"></line>
+                </svg>
+              </button>
+            </div>
+
+            <div class="record-meta">
+              <div class="record-timer" id="recordTimer">00:00.0</div>
+              <div class="record-status-pill" id="recordStatusPill">Idle</div>
+            </div>
+
+            <div class="rec-button-bar">
+              <button class="btn btn-primary" id="startRecBtn" onclick="startRecording()">
+                <span>●</span> Start Recording
+              </button>
+              <button class="btn btn-danger" id="stopRecBtn" onclick="stopRecording()" disabled>
+                <span>■</span> Stop Recording
+              </button>
+            </div>
+          </div>
+
+          <!-- Audio Playback Preview -->
+          <div class="audio-playback-box" id="playbackContainer" style="display: none;">
+            <label class="control-label">Recorded Audio Playback</label>
+            <audio id="audioPreview" controls></audio>
+          </div>
+
+          <!-- File Upload & Text Dropdowns -->
+          <div class="accordion-section">
+            <details class="details-box" id="fileUploadDetails">
+              <summary class="details-summary">📁 Or upload an audio file (.wav, .mp3, .webm)</summary>
+              <div class="details-body">
+                <div class="file-drop-zone" id="dropZone">
+                  <input type="file" id="fileInput" accept="audio/*,.wav,.mp3,.webm,.ogg,.m4a" onchange="handleFileUpload(event)">
+                  <p class="drop-text">Drag & drop an audio file here or <span class="link-span">browse</span></p>
+                  <span class="file-limits">16kHz mono PCM WAV recommended (max 25MB)</span>
+                </div>
+              </div>
+            </details>
+
+            <details class="details-box" id="manualTextDetails">
+              <summary class="details-summary">⌨️ Or enter text directly (MT testing)</summary>
+              <div class="details-body">
+                <textarea id="manualTextInput" class="form-textarea" rows="3" placeholder="Type a sentence in English, German, or French (e.g., 'Ich möchte morgen nach Berlin fahren.')..."></textarea>
+                <div class="btn-right-row">
+                  <button class="btn btn-secondary" onclick="translateManualText()">Translate Text</button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- Right Panel: Processing Status & Metric Summary -->
+        <section class="panel right-top-panel" aria-labelledby="evalHeading">
+          <div class="panel-header">
+            <h2 id="evalHeading" class="panel-title">System & Latency Evaluation</h2>
+            <span class="badge" id="rtfBadge">RTF: Not available</span>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">ASR Latency</span>
+              <span class="metric-value" id="valAsrTime">-- ms</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">MT Latency</span>
+              <span class="metric-value" id="valMtTime">-- ms</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Total Pipeline</span>
+              <span class="metric-value highlight" id="valTotalTime">-- ms</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Audio Duration</span>
+              <span class="metric-value" id="valAudioDur">-- s</span>
+            </div>
+          </div>
+
+          <div class="spec-list">
+            <div class="spec-row">
+              <span class="spec-name">ASR Model:</span>
+              <span class="spec-val" id="specAsr">faster-whisper (tiny int8)</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-name">Translation Engine:</span>
+              <span class="spec-val" id="specMt">ArgosTranslate / MarianMT</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-name">Execution Mode:</span>
+              <span class="spec-val" id="specMode">Local Offline</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Results Section: Three Distinct Cards -->
+      <section class="results-section" aria-labelledby="resultsHeading">
+        <div class="results-header">
+          <h2 id="resultsHeading" class="section-title">Translation Results</h2>
+          <span class="results-sub">Input speech transcript and both target translations</span>
+        </div>
+
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+          <div class="spinner"></div>
+          <p id="loadingMsg">Transcribing audio and translating...</p>
+        </div>
+
+        <div class="results-grid" id="resultsGrid">
+          <!-- Card 1: Original Speech -->
+          <article class="result-card card-source" id="cardSource">
+            <header class="card-header">
+              <div class="card-lang-badge">
+                <span class="flag-icon" id="srcFlag">🎙️</span>
+                <span class="lang-title" id="srcLangTitle">Original Speech</span>
+                <span class="lang-code-pill" id="srcCodePill">--</span>
+              </div>
+              <span class="conf-pill" id="srcConfPill">Confidence: --</span>
+            </header>
+            <div class="card-body">
+              <div class="transcript-display" id="srcTextDisplay">
+                <span class="placeholder-text">Speak or upload an audio file to see the transcription here...</span>
+              </div>
+            </div>
+            <footer class="card-footer">
+              <button class="btn btn-icon" id="copySrcBtn" onclick="copyCardText('srcTextDisplay', 'copySrcBtn')" title="Copy transcript">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              </button>
+            </footer>
+          </article>
+
+          <!-- Card 2: First Translation -->
+          <article class="result-card card-target1" id="cardTarget1">
+            <header class="card-header">
+              <div class="card-lang-badge">
+                <span class="flag-icon" id="tgt1Flag">🇩🇪</span>
+                <span class="lang-title" id="tgt1LangTitle">First Translation</span>
+                <span class="lang-code-pill" id="tgt1CodePill">DE</span>
+              </div>
+              <span class="model-pill">MT Target 1</span>
+            </header>
+            <div class="card-body">
+              <div class="transcript-display" id="tgt1TextDisplay">
+                <span class="placeholder-text">First translation output will appear here...</span>
+              </div>
+            </div>
+            <footer class="card-footer">
+              <button class="btn btn-icon" id="copyTgt1Btn" onclick="copyCardText('tgt1TextDisplay', 'copyTgt1Btn')" title="Copy first translation">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              </button>
+            </footer>
+          </article>
+
+          <!-- Card 3: Second Translation -->
+          <article class="result-card card-target2" id="cardTarget2">
+            <header class="card-header">
+              <div class="card-lang-badge">
+                <span class="flag-icon" id="tgt2Flag">🇫🇷</span>
+                <span class="lang-title" id="tgt2LangTitle">Second Translation</span>
+                <span class="lang-code-pill" id="tgt2CodePill">FR</span>
+              </div>
+              <span class="model-pill">MT Target 2</span>
+            </header>
+            <div class="card-body">
+              <div class="transcript-display" id="tgt2TextDisplay">
+                <span class="placeholder-text">Second translation output will appear here...</span>
+              </div>
+            </div>
+            <footer class="card-footer">
+              <button class="btn btn-icon" id="copyTgt2Btn" onclick="copyCardText('tgt2TextDisplay', 'copyTgt2Btn')" title="Copy second translation">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy
+              </button>
+            </footer>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!-- Tab 2: Dataset Benchmark & Evaluation -->
+    <main class="tab-content" id="tabDatasetContent" style="display: none;">
+      <section class="panel benchmark-panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">FLORES-200 & Speech Dataset Evaluation</h2>
+            <p class="panel-subtitle">Evaluate recognition and dual translations against ground-truth human annotations</p>
+          </div>
+          <div class="export-btns">
+            <button class="btn btn-secondary" onclick="exportResults('json')">📥 Export JSON</button>
+            <button class="btn btn-secondary" onclick="exportResults('csv')">📥 Export CSV</button>
+          </div>
+        </div>
+
+        <!-- Sample Selector -->
+        <div class="benchmark-selector-row">
+          <div class="control-group flex-2">
+            <label for="benchmarkSelect" class="control-label">Select FLORES-200 Pilot Example</label>
+            <select id="benchmarkSelect" class="form-select" onchange="loadSelectedBenchmark()">
+              <option value="">Loading benchmark records...</option>
+            </select>
+          </div>
+
+          <div class="control-group flex-1">
+            <label for="benchmarkSrcLang" class="control-label">Source Language</label>
+            <select id="benchmarkSrcLang" class="form-select" onchange="loadSelectedBenchmark()">
+              <option value="en">🇬🇧 English (EN)</option>
+              <option value="de">🇩🇪 German (DE)</option>
+              <option value="fr">🇫🇷 French (FR)</option>
+            </select>
+          </div>
+
+          <div class="control-group flex-1 btn-align-end">
+            <button class="btn btn-primary" onclick="runBenchmarkEvaluation()">⚡ Run Evaluation</button>
+          </div>
+        </div>
+
+        <!-- Benchmark Audio Player -->
+        <div class="benchmark-audio-row" id="benchAudioRow" style="display: none;">
+          <div class="bench-audio-item">
+            <span class="control-label" id="benchAudioLabel">Human Speech Recording:</span>
+            <audio id="benchAudioPlayer" controls></audio>
+          </div>
+        </div>
+
+        <!-- Benchmark Comparison Table -->
+        <div class="benchmark-diff-grid">
+          <div class="diff-card">
+            <div class="diff-header">
+              <span class="diff-title">ASR Transcript Evaluation</span>
+              <div class="metric-tags">
+                <span class="tag tag-wer" id="metricWer">WER: --</span>
+                <span class="tag tag-cer" id="metricCer">CER: --</span>
+              </div>
+            </div>
+            <div class="diff-content">
+              <div class="diff-row">
+                <span class="diff-label">Ground Truth:</span>
+                <div class="diff-text gold-text" id="benchGoldAsr">--</div>
+              </div>
+              <div class="diff-row">
+                <span class="diff-label">Model Output:</span>
+                <div class="diff-text hyp-text" id="benchHypAsr">--</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="diff-card">
+            <div class="diff-header">
+              <span class="diff-title" id="benchTgt1Title">Translation 1 Evaluation</span>
+              <div class="metric-tags">
+                <span class="tag tag-bleu" id="metricBleu1">BLEU: --</span>
+                <span class="tag tag-chrf" id="metricChrf1">chrF: --</span>
+              </div>
+            </div>
+            <div class="diff-content">
+              <div class="diff-row">
+                <span class="diff-label">FLORES Reference:</span>
+                <div class="diff-text gold-text" id="benchGoldTgt1">--</div>
+              </div>
+              <div class="diff-row">
+                <span class="diff-label">Model Output:</span>
+                <div class="diff-text hyp-text" id="benchHypTgt1">--</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="diff-card">
+            <div class="diff-header">
+              <span class="diff-title" id="benchTgt2Title">Translation 2 Evaluation</span>
+              <div class="metric-tags">
+                <span class="tag tag-bleu" id="metricBleu2">BLEU: --</span>
+                <span class="tag tag-chrf" id="metricChrf2">chrF: --</span>
+              </div>
+            </div>
+            <div class="diff-content">
+              <div class="diff-row">
+                <span class="diff-label">FLORES Reference:</span>
+                <div class="diff-text gold-text" id="benchGoldTgt2">--</div>
+              </div>
+              <div class="diff-row">
+                <span class="diff-label">Model Output:</span>
+                <div class="diff-text hyp-text" id="benchHypTgt2">--</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evaluation History Log -->
+        <div class="history-section">
+          <h3 class="history-title">Evaluation Session Log</h3>
+          <div class="table-wrap">
+            <table class="history-table" id="historyTable">
+              <thead>
+                <tr>
+                  <th>Test ID</th>
+                  <th>Source</th>
+                  <th>Targets</th>
+                  <th>WER</th>
+                  <th>CER</th>
+                  <th>Avg BLEU</th>
+                  <th>Total Time</th>
+                  <th>RTF</th>
+                </tr>
+              </thead>
+              <tbody id="historyTbody">
+                <tr>
+                  <td colspan="8" class="text-center empty-row">No benchmark evaluations recorded yet. Run an evaluation above.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <span>TollMatcher v1.0 — Research Translation Lab</span>
+        <span class="sep">•</span>
+        <span>Local Offline ST Benchmark</span>
+      </div>
+      <div class="footer-right">
+        <span>Languages: EN ↔ DE ↔ FR</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
